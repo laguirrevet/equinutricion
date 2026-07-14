@@ -1,0 +1,2092 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#1D9E75"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="EquiNutr"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="icon" href="favicon.ico"/>
+<title>EquiNutrición</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+ --bg:#0d0d0b;--surface:#161614;--surface2:#1e1e1b;--surface3:#252522;
+ --text:#f0efe8;--text2:#a8a79f;--text3:#6a6a62;
+ --accent:#1D9E75;--accent2:#25c490;--accent-bg:#0a2e20;--accent-text:#7de0b8;
+ --warn-bg:#2a1a00;--warn-text:#f0b84a;--warn-border:#7a4d00;
+ --danger-bg:#2a0a0a;--danger-text:#f08080;--danger-border:#7a2020;
+ --ok-bg:#0a2a10;--ok-text:#7de0a0;--ok-border:#1a6a30;
+ --border:#2a2a26;--border2:#383834;--radius:10px;
+ --safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px)
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden}
+.app{max-width:480px;margin:0 auto;padding-bottom:calc(72px + var(--safe-bot))}
+
+/* TOPBAR */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:calc(12px + var(--safe-top)) 16px 12px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:30}
+.topbar-logo{width:36px;height:36px;border-radius:10px;overflow:hidden;flex-shrink:0}
+.topbar-logo img{width:100%;height:100%;object-fit:cover}
+.topbar-text h1{font-size:17px;font-weight:700;letter-spacing:-.3px}
+.topbar-text p{font-size:11px;color:var(--text3);margin-top:1px}
+
+/* TABS */
+.tab-bar{display:flex;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:61px;z-index:29;overflow-x:auto;scrollbar-width:none}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab{flex:1;min-width:68px;padding:10px 4px;font-size:11px;font-weight:600;color:var(--text3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;letter-spacing:.2px;transition:color .15s}
+.tab.active{color:var(--accent2);border-bottom-color:var(--accent)}
+
+/* SECCIÓN */
+.section{padding:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px}
+.card-title{font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px}
+.sec-label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin:16px 0 8px}
+
+/* FORMS */
+label{display:block;font-size:13px;color:var(--text2);margin-bottom:5px;margin-top:14px}
+label:first-of-type{margin-top:0}
+input,select{width:100%;padding:11px 13px;font-size:15px;color:var(--text);background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);outline:none;-webkit-appearance:none;appearance:none;transition:border-color .15s}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg)}
+input::placeholder{color:var(--text3)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hint{font-size:11px;color:var(--text3);margin-top:5px;margin-bottom:2px;font-style:italic}
+
+/* BOTONES */
+.btn-primary{width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);font-size:15px;font-weight:700;cursor:pointer;margin-top:16px;letter-spacing:.2px;transition:opacity .15s}
+.btn-primary:active{opacity:.8}
+.btn-secondary{padding:10px 16px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);font-size:13px;cursor:pointer;color:var(--text);font-weight:600}
+.btn-ghost{padding:8px 12px;background:none;border:1px solid var(--border2);border-radius:var(--radius);font-size:12px;cursor:pointer;color:var(--text2);font-weight:500}
+.btn-danger{padding:7px 11px;background:var(--danger-bg);border:1px solid var(--danger-border);border-radius:8px;font-size:12px;cursor:pointer;color:var(--danger-text);font-weight:600}
+
+/* HORSE CARDS */
+.horse-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color .15s,background .15s}
+.horse-card:active{opacity:.85}
+.horse-card.selected{border-color:var(--accent);background:var(--accent-bg)}
+.horse-name{font-size:16px;font-weight:700;margin-bottom:3px}
+.horse-meta{font-size:12px;color:var(--text3)}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:700}
+.badge-ok{background:var(--ok-bg);color:var(--ok-text)}
+.badge-warn{background:var(--warn-bg);color:var(--warn-text)}
+.badge-danger{background:var(--danger-bg);color:var(--danger-text)}
+.badge-info{background:var(--surface3);color:var(--text2)}
+
+/* MÉTRICAS */
+.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.metric{background:var(--surface2);border-radius:var(--radius);padding:12px 14px;border:1px solid var(--border)}
+.metric .mlabel{font-size:11px;color:var(--text3);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.metric .mvalue{font-size:22px;font-weight:800;color:var(--text);line-height:1}
+.metric .munit{font-size:11px;color:var(--text2);font-weight:500}
+.metric.accent{border-color:var(--accent);background:var(--accent-bg)}
+.metric.accent .mvalue{color:var(--accent2)}
+
+/* PLAN DE COMIDAS */
+.meal-card{background:var(--surface2);border-radius:var(--radius);padding:13px;margin-bottom:8px;border:1px solid var(--border)}
+.meal-time{font-size:11px;font-weight:800;color:var(--accent2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.meal-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:3px 0;color:var(--text2)}
+.meal-row strong{color:var(--text);font-weight:700}
+
+/* ALERTAS */
+.alert-box{border-radius:var(--radius);padding:13px 15px;margin-bottom:10px;font-size:13px;display:flex;gap:10px;align-items:flex-start;line-height:1.55;border:1px solid}
+.alert-ok{background:var(--ok-bg);border-color:var(--ok-border);color:var(--ok-text)}
+.alert-warn{background:var(--warn-bg);border-color:var(--warn-border);color:var(--warn-text)}
+.alert-danger{background:var(--danger-bg);border-color:var(--danger-border);color:var(--danger-text)}
+.alert-info{background:var(--surface2);border-color:var(--border2);color:var(--text2)}
+.alert-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+
+/* PROGRESO */
+.prog-wrap{margin-top:12px}
+.prog-label{display:flex;justify-content:space-between;font-size:12px;color:var(--text3);margin-bottom:6px;font-weight:600}
+.prog-bar{height:8px;background:var(--surface3);border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;border-radius:4px;transition:width .5s}
+
+/* INGREDIENTES */
+.ing-row{border-top:1px solid var(--border);padding:10px 0;display:flex;justify-content:space-between;align-items:center}
+.ing-row:first-of-type{border-top:none;padding-top:0}
+.ing-name{font-size:13px;font-weight:700}
+.ing-detail{font-size:11px;color:var(--text3);margin-top:2px}
+.ing-val{font-size:15px;font-weight:800;color:var(--accent2);text-align:right;white-space:nowrap}
+
+/* RISK TAGS */
+.risk-tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle;font-weight:700}
+.risk-high{background:var(--danger-bg);color:var(--danger-text)}
+.risk-med{background:var(--warn-bg);color:var(--warn-text)}
+.risk-low{background:var(--ok-bg);color:var(--ok-text)}
+
+/* FOOD ITEMS */
+.food-item{display:flex;justify-content:space-between;align-items:center;padding:11px 13px;background:var(--surface2);border-radius:var(--radius);margin-bottom:8px;border:1px solid var(--border)}
+.food-name{font-size:13px;font-weight:700;margin-bottom:2px}
+.food-detail{font-size:11px;color:var(--text3)}
+
+/* SUPLEMENTOS */
+.supl-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:8px}
+.supl-name{font-size:14px;font-weight:700;margin-bottom:3px}
+.supl-detail{font-size:12px;color:var(--text3)}
+
+/* HISTORIAL DE PESO */
+.peso-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid var(--border)}
+.peso-row:first-of-type{border-top:none;padding-top:0}
+.peso-fecha{font-size:12px;color:var(--text3)}
+.peso-val{font-size:16px;font-weight:800;color:var(--accent2)}
+.peso-delta{font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px}
+.delta-up{background:var(--ok-bg);color:var(--ok-text)}
+.delta-down{background:var(--danger-bg);color:var(--danger-text)}
+.delta-eq{background:var(--surface3);color:var(--text3)}
+.peso-chart{margin:14px 0 4px;display:flex;align-items:flex-end;gap:4px;height:48px}
+.peso-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.peso-bar{width:100%;background:var(--accent);border-radius:3px 3px 0 0;min-height:4px;transition:height .3s}
+.peso-bar-label{font-size:9px;color:var(--text3);white-space:nowrap}
+
+/* RECORDATORIO */
+.reminder-banner{background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.reminder-text{font-size:13px;color:var(--warn-text);font-weight:500;line-height:1.4}
+.reminder-close{background:none;border:none;color:var(--warn-text);font-size:18px;cursor:pointer;padding:0 4px;flex-shrink:0;font-weight:700}
+
+/* PESO MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.modal{background:var(--surface);border-radius:20px 20px 0 0;padding:20px 16px calc(20px + var(--safe-bot));width:100%;max-width:480px;max-height:90dvh;overflow-y:auto}
+.modal-title{font-size:17px;font-weight:800;margin-bottom:4px}
+.modal-sub{font-size:13px;color:var(--text3);margin-bottom:20px}
+.step-indicator{display:flex;gap:6px;margin-bottom:20px}
+.step-dot{flex:1;height:4px;border-radius:2px;background:var(--border2);transition:background .3s}
+.step-dot.active{background:var(--accent)}
+.step-dot.done{background:var(--accent2)}
+.step-visual{background:var(--surface2);border-radius:12px;padding:20px;margin-bottom:16px;text-align:center;border:1px solid var(--border2)}
+.step-visual .icon{font-size:48px;margin-bottom:10px}
+.step-visual p{font-size:13px;color:var(--text2);line-height:1.6}
+.step-visual strong{color:var(--accent2)}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:48px 20px;color:var(--text3)}
+.empty-icon{font-size:52px;margin-bottom:14px}
+.empty h3{font-size:16px;font-weight:700;color:var(--text2);margin-bottom:6px}
+.empty p{font-size:13px;margin-bottom:20px;line-height:1.5}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:16px 0}
+.success-msg{color:var(--ok-text);font-size:13px;margin-top:10px;font-weight:600;text-align:center}
+
+/* INSTALL BANNER */
+.install-banner{background:var(--accent-bg);border:1px solid var(--ok-border);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px;font-size:13px;color:var(--accent-text);display:flex;justify-content:space-between;align-items:center;gap:10px}
+.install-banner button{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer}
+
+
+/* ONBOARDING / PLANES */
+.onboarding-overlay{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;padding:0 0 40px}
+.onboarding-header{width:100%;max-width:480px;padding:calc(24px + var(--safe-top)) 20px 20px;text-align:center}
+.onboarding-logo{width:72px;height:72px;border-radius:20px;overflow:hidden;margin:0 auto 14px}
+.onboarding-logo img{width:100%;height:100%;object-fit:cover}
+.onboarding-title{font-size:24px;font-weight:800;margin-bottom:6px;letter-spacing:-.5px}
+.onboarding-sub{font-size:14px;color:var(--text2);line-height:1.5}
+.plan-cards{width:100%;max-width:480px;padding:0 16px;display:flex;flex-direction:column;gap:12px}
+.plan-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden}
+.plan-card.featured{border-color:var(--accent);background:linear-gradient(135deg,var(--accent-bg),var(--surface))}
+.plan-badge{position:absolute;top:14px;right:14px;background:var(--accent);color:#fff;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
+.plan-name{font-size:18px;font-weight:800;margin-bottom:4px}
+.plan-price{font-size:28px;font-weight:800;color:var(--accent2);margin-bottom:4px}
+.plan-price span{font-size:13px;color:var(--text3);font-weight:500}
+.plan-desc{font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5}
+.plan-features{list-style:none;margin-bottom:16px}
+.plan-features li{font-size:13px;color:var(--text2);padding:4px 0;display:flex;align-items:center;gap:8px}
+.plan-features li::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.plan-features li.locked{color:var(--text3)}
+.plan-features li.locked::before{background:var(--border2)}
+.plan-btn{width:100%;padding:13px;border:none;border-radius:var(--radius);font-size:14px;font-weight:700;cursor:pointer}
+.plan-btn-primary{background:var(--accent);color:#fff}
+.plan-btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
+
+/* CÓDIGO DE ACTIVACIÓN */
+.plan-chip{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border2);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:12px}
+.plan-chip.premium{background:var(--accent-bg);border-color:var(--accent);color:var(--accent2)}
+
+/* CONDICIÓN CORPORAL */
+.cc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.cc-card{background:var(--surface2);border:2px solid var(--border);border-radius:var(--radius);padding:10px 6px;text-align:center;cursor:pointer;transition:.15s}
+.cc-card.selected{border-color:var(--accent);background:var(--accent-bg)}
+.cc-card .cc-num{font-size:22px;font-weight:800;color:var(--accent2);margin-bottom:3px}
+.cc-card .cc-label{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.cc-desc{background:var(--surface2);border-radius:var(--radius);padding:12px;font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:12px;border:1px solid var(--border);min-height:60px}
+.cc-indicator{height:8px;border-radius:4px;margin-bottom:14px;background:linear-gradient(to right,#E24B4A,#f0b84a,#1D9E75);position:relative}
+.cc-indicator-dot{position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid var(--accent);top:-4px;transition:left .3s}
+
+/* NUTRIENTES */
+.nutrient-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.nutrient-item{background:var(--surface2);border-radius:var(--radius);padding:10px 12px;border:1px solid var(--border)}
+.nutrient-label{font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
+.nutrient-val{font-size:16px;font-weight:800;color:var(--text)}
+.nutrient-unit{font-size:10px;color:var(--text2);font-weight:500}
+.nutrient-bar{height:4px;background:var(--border);border-radius:2px;margin-top:6px;overflow:hidden}
+.nutrient-fill{height:100%;border-radius:2px}
+
+.hidden{display:none}
+/* FOTO CABALLO */
+.foto-preview{width:80px;height:80px;border-radius:12px;object-fit:cover;border:2px solid var(--border2);display:block;margin-bottom:10px}
+.foto-placeholder{width:80px;height:80px;border-radius:12px;background:var(--surface2);border:2px dashed var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3);text-align:center;cursor:pointer;margin-bottom:10px;line-height:1.4}
+.foto-btns{display:flex;gap:8px;margin-bottom:14px}
+</style>
+</head>
+<body>
+
+<!-- ONBOARDING -->
+<div id="onboarding" class="onboarding-overlay hidden">
+ <div class="onboarding-header">
+ <div class="onboarding-logo"><img id="ob-logo" alt="EquiNutrición"/></div>
+ <div class="onboarding-title">EquiNutrición</div>
+ <div class="onboarding-sub">Nutrición científica para el Caballo Corralero Chileno</div>
+ </div>
+ <div class="plan-cards">
+    <div class="plan-card">
+      <div class="plan-name">Gratuito</div>
+      <div class="plan-price">$0 <span>para siempre</span></div>
+      <div class="plan-desc">Para empezar a mejorar la nutrición de tu caballo sin costo.</div>
+      <ul class="plan-features">
+        <li>1 caballo registrado</li>
+        <li>Ración diaria calculada</li>
+        <li>Historial de peso</li>
+        <li>Condición corporal con guía</li>
+        <li>Verificador de seguridad</li>
+        <li class="locked">Caballos ilimitados</li>
+        <li class="locked">Gestión de colleras</li>
+        <li class="locked">Soporte por WhatsApp</li>
+      </ul>
+      <button class="plan-btn plan-btn-primary" onclick="activatePlan('free')">Comenzar gratis</button>
+    </div>
+    <div class="plan-card featured">
+      <div class="plan-badge">Recomendado</div>
+      <div class="plan-name">Premium</div>
+      <div class="plan-desc">Para criaderos con colleras en competencia. Caballos ilimitados.</div>
+      <ul class="plan-features">
+        <li>Caballos ilimitados</li>
+        <li>Todo lo del plan gratuito</li>
+        <li>Gestión completa de colleras</li>
+        <li>Soporte directo por WhatsApp</li>
+        <li class="locked">Costos por ración (próximamente)</li>
+        <li class="locked">Planificación pre/post rodeo (próximamente)</li>
+      </ul>
+      <div style="display:flex;flex-direction:column;gap:10px;margin:14px 0">
+        <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:14px">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Mensual</div>
+          <div style="font-size:26px;font-weight:800;color:var(--accent2);margin-bottom:10px">$4.000 <span style="font-size:13px;color:var(--text3);font-weight:500">/ mes</span></div>
+          <a href="https://wa.me/56932673835?text=Hola%2C%20quiero%20activar%20EquiNutri%C3%B3n%20Premium%20%E2%80%94%20Plan%20mensual%20%244.000%2Fmes" target="_blank" style="display:block;width:100%;padding:12px;background:var(--surface3);color:var(--text);border:1px solid var(--border2);border-radius:var(--radius);font-size:14px;font-weight:700;text-align:center;text-decoration:none">Contratar plan mensual</a>
+        </div>
+        <div style="background:var(--accent-bg);border:2px solid var(--accent);border-radius:var(--radius);padding:14px;position:relative;margin-top:8px">
+          <div style="position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:10px;font-weight:800;padding:3px 14px;border-radius:20px;white-space:nowrap">MEJOR PRECIO</div>
+          <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Anual</div>
+          <div style="font-size:26px;font-weight:800;color:var(--accent2);margin-bottom:4px">$35.000 <span style="font-size:13px;color:var(--text3);font-weight:500">/ año</span></div>
+          <div style="font-size:12px;color:var(--accent-text);margin-bottom:10px">Primer mes gratis — el año comienza a correr desde el segundo mes.</div>
+          <a href="https://wa.me/56932673835?text=Hola%2C%20quiero%20activar%20EquiNutri%C3%B3n%20Premium%20%E2%80%94%20Plan%20anual%20%2435.000%2Fa%C3%B1o%20con%20primer%20mes%20gratis" target="_blank" style="display:block;width:100%;padding:12px;background:var(--accent);color:#fff;border-radius:var(--radius);font-size:14px;font-weight:700;text-align:center;text-decoration:none">Contratar plan anual</a>
+        </div>
+      </div>
+      <div style="text-align:center;font-size:12px;color:var(--text3)">Recibirás tu código de activación por WhatsApp</div>
+    </div>
+    <div style="text-align:center;padding:16px 0 8px;font-size:12px;color:var(--text3)">Al continuar aceptas los términos de uso de EquiNutrición</div>
+  </div>
+</div><!-- cierre onboarding -->
+
+<!-- MODAL CÓDIGO DE ACTIVACIÓN -->
+<div id="modal-codigo" class="modal-overlay hidden" onclick="closeCodigoModal(event)">
+ <div class="modal" onclick="event.stopPropagation()">
+ <div class="modal-title">Código de activación</div>
+ <div class="modal-sub">Ingresa el código que recibiste al contratar el plan Premium</div>
+ <label>Código</label>
+ <input type="text" id="codigo-input" placeholder="Ej: EN-PRE-2026-XXXX" style="text-transform:uppercase;letter-spacing:2px;font-weight:700"/>
+ <div id="codigo-error" class="hidden" style="color:var(--danger-text);font-size:13px;margin-top:8px"></div>
+ <button class="btn-primary" onclick="validateCodigo()">Activar plan Premium</button>
+ <button class="btn-secondary hidden" id="btn-close-codigo" onclick="closeCodigoModal(null)" style="width:100%;margin-top:8px">Cancelar</button>
+ </div>
+</div>
+
+<div class="app">
+
+<!-- TOPBAR -->
+<div class="topbar">
+ <div class="topbar-logo">
+ <img id="topbar-logo-img" alt="EquiNutrición logo"/>
+ </div>
+ <div class="topbar-text">
+ <h1>EquiNutrición</h1>
+ <p> · Caballo Corralero</p>
+ </div>
+</div>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+ <button class="tab active" onclick="showTab('caballos')" id="tab-caballos">Caballos</button>
+ <button class="tab" onclick="showTab('racion')" id="tab-racion">Ración</button>
+ <button class="tab" onclick="showTab('condicion')" id="tab-condicion">C. Corporal</button>
+ <button class="tab" onclick="showTab('suplementos')" id="tab-suplementos">Supl.</button>
+ <button class="tab" onclick="showTab('peso')" id="tab-peso">⚖️ Peso</button>
+ <button class="tab" onclick="showTab('alimentos')" id="tab-alimentos">Alimentos</button>
+ <button class="tab" onclick="showTab('nuevo')" id="tab-nuevo">+ Caballo</button>
+</div>
+
+<!-- ═══════════════ CABALLOS ═══════════════ -->
+<div id="view-caballos" class="section">
+ <div id="install-banner" class="install-banner hidden">
+ <span>📲 Instala EquiNutrición en tu celular para usarla sin internet</span>
+ <button onclick="installPWA()">Instalar</button>
+ </div>
+ <div id="reminder-banners"></div>
+ <div id="horse-list"></div>
+ <div id="no-horses" class="empty hidden">
+ <div class="empty-icon">🐴</div>
+ <h3>Sin caballos registrados</h3>
+ <p>Agrega tu primer corralero para comenzar a calcular sus raciones con </p>
+ <button class="btn-secondary" onclick="showTab('nuevo')">Agregar caballo →</button>
+ </div>
+</div>
+
+<!-- ═══════════════ HISTORIAL DE PESO ═══════════════ -->
+<div id="view-peso" class="section hidden">
+ <div id="no-sel-peso" class="empty">
+ <div class="empty-icon">⚖️</div>
+ <h3>Selecciona un caballo</h3>
+ <p>Ve a Caballos y toca uno para ver su historial de peso</p>
+ </div>
+ <div id="peso-content" class="hidden">
+ <div class="card">
+ <div class="card-title">Peso actual de <span id="peso-horse-name" style="color:var(--accent2)"></span></div>
+ <div id="peso-actual-display" style="font-size:36px;font-weight:800;color:var(--accent2);margin-bottom:4px"></div>
+ <div id="peso-ultimo-registro" style="font-size:12px;color:var(--text3);margin-bottom:16px"></div>
+ <div id="peso-chart-wrap" class="hidden">
+ <div class="card-title" style="margin-bottom:8px">Evolución de peso</div>
+ <div class="peso-chart" id="peso-chart"></div>
+ </div>
+ </div>
+ <div class="card">
+ <div class="card-title">Registrar nuevo pesaje</div>
+      <label>Fecha del pesaje</label>
+      <input type="date" id="p-fecha"/>
+
+      <label>Método de medición</label>
+      <select id="p-metodo" onchange="toggleMetodoPeso(this.value)">
+        <option value="cinta">Cinta métrica (PT y LEI)</option>
+        <option value="directo">Balanza directa</option>
+        <option value="estimado">Estimado visual</option>
+      </select>
+
+      <div id="guia-cinta" style="margin-top:10px">
+        <div class="alert-box alert-info" style="margin-bottom:10px">
+          <div>
+            <strong>Cómo medir correctamente:</strong><br/>
+            <span style="font-size:12px;line-height:1.9">
+              1. Caballo parado en terreno plano, 4 patas firmes<br/>
+              2. <strong>PT:</strong> huincha justo detrás de la cruz (parte más alta del lomo)<br/>
+              3. <strong>LEI:</strong> desde la punta del encuentro hasta la punta de la nalga<br/>
+              4. Huincha firme sin presionar la piel — medir cuando exhala
+            </span>
+          </div>
+        </div>
+        <div class="row2">
+          <div>
+            <label>PT — Perímetro torácico (cm)</label>
+            <input type="number" id="p-pt" placeholder="Ej: 168" min="100" max="250"/>
+          </div>
+          <div>
+            <label>LEI — Largo escáp.-isquial (cm)</label>
+            <input type="number" id="p-lei" placeholder="Ej: 152" min="80" max="220"/>
+          </div>
+        </div>
+        <button class="btn-secondary" onclick="calcPesoDesdeMediacion()" style="width:100%;margin-bottom:8px">Calcular peso desde medición</button>
+        <div id="p-calc-result" class="hidden" style="font-size:15px;color:var(--accent2);font-weight:800;margin-bottom:8px;text-align:center"></div>
+      </div>
+
+      <label>Peso registrado (kg)</label>
+      <input type="number" id="p-peso" placeholder="Ej: 392" min="150" max="700"/>
+      <label>Notas (opcional)</label>
+      <input type="text" id="p-notas" maxlength="200" placeholder="Ej: post competencia, buen estado corporal"/>
+      <button class="btn-primary" onclick="savePesaje()">Guardar pesaje</button>
+      <p id="pesaje-msg" class="success-msg hidden">✓ Pesaje guardado — ración actualizada automáticamente</p>
+ </div>
+ <div class="card">
+ <div class="card-title">Historial completo</div>
+ <div id="peso-list"></div>
+ <div id="no-pesajes" class="hidden" style="font-size:13px;color:var(--text3);text-align:center;padding:16px 0">Sin pesajes registrados</div>
+ </div>
+ </div>
+</div>
+
+<!-- ═══════════════ RACIÓN ═══════════════ -->
+<div id="view-racion" class="section hidden">
+ <div id="no-sel-racion" class="empty">
+ <div class="empty-icon">🌿</div>
+ <h3>Selecciona un caballo</h3>
+ <p>Ve a Caballos y toca uno para ver su plan de ración diaria</p>
+ </div>
+ <div id="racion-content" class="hidden">
+ <div class="card">
+ <div class="card-title">Plan de alimentación</div>
+ <div id="meal-plan"></div>
+ </div>
+ <div class="card">
+ <div class="card-title">Ingredientes y cobertura</div>
+ <div id="ingredient-detail"></div>
+ </div>
+ <div class="card">
+ <div class="card-title">Requerimientos diarios</div>
+ <div class="metric-grid" id="metrics-grid"></div>
+ <div class="card-title" style="margin-top:14px">Proteína y minerales</div>
+ <div class="nutrient-grid" id="nutrient-grid"></div>
+ </div>
+ <div class="card">
+ <div class="card-title">Exportar plan de ración</div>
+ <p style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5">Genera el plan diario para compartir con el cuidador por WhatsApp o imprimir.</p>
+ <div style="display:flex;gap:10px">
+ <button class="btn-secondary" onclick="exportarPNG()" style="flex:1;padding:12px">Imagen PNG</button>
+ <button class="btn-secondary" onclick="exportarPDF()" style="flex:1;padding:12px">PDF</button>
+ </div>
+ <p id="export-msg" class="success-msg hidden" style="margin-top:10px">Listo — revisa tus descargas</p>
+ </div>
+ </div>
+</div>
+
+<!-- CANVAS oculto para exportación PNG -->
+<canvas id="export-canvas" style="display:none"></canvas>
+
+
+<div id="view-condicion" class="section hidden">
+ <div id="no-sel-cc" class="empty">
+ <div class="empty-icon">📊</div>
+ <h3>Selecciona un caballo</h3>
+ <p>Ve a Caballos y toca uno para registrar su condición corporal</p>
+ </div>
+ <div id="cc-content" class="hidden">
+ <div class="card">
+ <div class="card-title">Condición corporal de <span id="cc-horse-name" style="color:var(--accent2)"></span></div>
+ <div class="cc-indicator"><div class="cc-indicator-dot" id="cc-dot" style="left:0%"></div></div>
+ <div class="cc-grid" id="cc-grid"></div>
+ <div class="cc-desc" id="cc-desc">Selecciona una puntuación para ver la descripción</div>
+ <button class="btn-primary" onclick="saveCC()">Guardar condición corporal</button>
+ <p id="cc-msg" class="success-msg hidden">Condición corporal guardada</p>
+ </div>
+ <div class="card">
+ <div class="card-title">Historial de condición corporal</div>
+ <div id="cc-history"></div>
+ <div id="no-cc" class="hidden" style="font-size:13px;color:var(--text3);text-align:center;padding:16px 0">Sin registros aún</div>
+ </div>
+ <div class="card">
+ <div class="card-title">Guía de evaluación de condición corporal</div>
+ <div style="font-size:13px;color:var(--text2);line-height:1.7">
+ <p style="margin-bottom:10px">La evaluación considera 6 zonas del cuerpo: cuello, cruz, hombro, costillas, lomo y nalga. Cada zona se palpa y observa.</p>
+ <div style="background:var(--surface2);border-radius:var(--radius);padding:12px;border:1px solid var(--border)">
+ <div style="font-weight:700;color:var(--danger-text);margin-bottom:4px">1–3: Bajo peso</div>
+ <div style="font-size:12px;color:var(--text3);margin-bottom:10px">Costillas, vértebras y estructura ósea visibles. Animal emaciado o muy flaco.</div>
+ <div style="font-weight:700;color:var(--warn-text);margin-bottom:4px">4–6: Peso ideal</div>
+ <div style="font-size:12px;color:var(--text3);margin-bottom:10px">Costillas palpables pero no visibles. Lomo plano o levemente redondeado. Condición óptima para trabajo.</div>
+ <div style="font-weight:700;color:var(--danger-text);margin-bottom:4px">7–9: Sobrepeso</div>
+ <div style="font-size:12px;color:var(--text3)">Costillas difíciles de palpar. Depósitos de grasa visibles en cuello, cruz y cola. Riesgo de laminitis.</div>
+ </div>
+ </div>
+ </div>
+ </div>
+</div>
+
+<!-- ═══════════════ SUPLEMENTOS ═══════════════ -->
+<div id="view-suplementos" class="section hidden">
+ <div id="no-sel-supl" class="alert-box alert-warn" style="margin-bottom:12px">
+ <span class="alert-icon"></span><span>Selecciona un caballo primero</span>
+ </div>
+ <div id="supl-content" class="hidden">
+ <div class="card">
+ <div class="card-title">Suplementos de <span id="supl-horse-name" style="color:var(--accent2)"></span></div>
+ <div id="supl-list"></div>
+ <div id="no-supl" class="hidden" style="font-size:13px;color:var(--text3);text-align:center;padding:16px 0">Sin suplementos registrados</div>
+ </div>
+ <div class="card">
+ <div class="card-title">Agregar suplemento</div>
+ <label>Nombre del suplemento</label>
+ <input type="text" id="s-nombre" maxlength="80" placeholder="Ej: Vitamina E"/>
+ <label>Marca comercial</label>
+ <input type="text" id="s-marca" maxlength="80" placeholder="Ej: Vit-E Equino 500"/>
+ <div class="row2">
+ <div><label>Dosis</label><input type="text" id="s-dosis" maxlength="40" placeholder="Ej: 500 UI"/></div>
+ <div><label>Frecuencia</label>
+ <select id="s-frecuencia">
+ <option value="diario">Diario</option>
+ <option value="cada2dias">Cada 2 días</option>
+ <option value="semanal">Semanal</option>
+ <option value="quincenal">Quincenal</option>
+ <option value="mensual">Mensual</option>
+ <option value="segun_necesidad">Según necesidad</option>
+ </select>
+ </div>
+ </div>
+ <label>Vía de administración</label>
+ <select id="s-via">
+ <option value="oral">Oral (en el alimento)</option>
+ <option value="oral_jeringa">Oral (jeringa)</option>
+ <option value="topico">Tópico</option>
+ <option value="im">Intramuscular</option>
+ <option value="iv">Intravenoso</option>
+ </select>
+ <label>Notas (opcional)</label>
+ <input type="text" id="s-notas" maxlength="200" placeholder="Ej: dar con el heno de la mañana"/>
+ <button class="btn-primary" onclick="saveSupl()">Guardar suplemento</button>
+ <p id="supl-msg" class="success-msg hidden">✓ Guardado</p>
+ </div>
+ </div>
+</div>
+
+<!-- ═══════════════ ALIMENTOS ═══════════════ -->
+<div id="view-alimentos" class="section hidden">
+ <div class="card">
+ <div class="card-title">Base de alimentos</div>
+ <div id="food-list"></div>
+ </div>
+ <div class="card">
+ <div class="card-title">Agregar alimento personalizado</div>
+ <label>Nombre</label>
+ <input type="text" id="cf-nombre" maxlength="60" placeholder="Ej: Heno de avena"/>
+ <div class="row2">
+ <div><label>ED (Mcal/kg MS)</label><input type="number" id="cf-ed" placeholder="2.4" step="0.01" min="0"/></div>
+ <div><label>Almidón (% MS)</label><input type="number" id="cf-starch" placeholder="5" step="0.1" min="0" max="100"/></div>
+ </div>
+ <div class="row2">
+ <div><label>Materia seca (%)</label><input type="number" id="cf-ms" placeholder="88" step="0.1" min="1" max="100"/></div>
+ <div><label>Tipo</label>
+ <select id="cf-tipo">
+ <option value="forraje">Forraje</option>
+ <option value="concentrado">Concentrado</option>
+ <option value="subproducto">Subproducto</option>
+ <option value="energia">Suplemento</option>
+ </select>
+ </div>
+ </div>
+ <label>Nivel de riesgo</label>
+ <select id="cf-riesgo">
+ <option value="low">Bajo (forrajes, aceites)</option>
+ <option value="med">Medio (pellets)</option>
+ <option value="high">Alto (granos, afrechillo)</option>
+ </select>
+ <button class="btn-primary" onclick="saveCustomFood()">Guardar alimento</button>
+ <p id="cf-msg" class="success-msg hidden">✓ Alimento guardado</p>
+ </div>
+</div>
+
+<!-- ═══════════════ NUEVO / EDITAR CABALLO ═══════════════ -->
+<div id="view-nuevo" class="section hidden">
+ <div class="card">
+ <div class="card-title" id="form-caballo-title">Registrar caballo</div>
+ <input type="hidden" id="f-id"/>
+
+ <label>Nombre del caballo</label>
+ <input type="text" id="f-nombre" maxlength="60" placeholder="Ej: Relámpago"/>
+
+ <label>Foto del ejemplar (opcional)</label>
+ <div>
+ <img id="foto-preview" class="foto-preview hidden"/>
+ <div id="foto-placeholder" class="foto-placeholder" onclick="document.getElementById('foto-input').click()">
+ Toca para<br/>agregar foto
+ </div>
+ <input type="file" id="foto-input" accept="image/*" capture="environment" style="display:none" onchange="handleFoto(event)"/>
+ <div class="foto-btns">
+ <button type="button" class="btn-secondary" onclick="document.getElementById('foto-input').removeAttribute('capture');document.getElementById('foto-input').click()" style="flex:1;font-size:12px">Galería</button>
+ <button type="button" class="btn-secondary" onclick="document.getElementById('foto-input').setAttribute('capture','environment');document.getElementById('foto-input').click()" style="flex:1;font-size:12px">Cámara</button>
+ <button type="button" class="btn-ghost" id="btn-quitar-foto" onclick="quitarFoto()" style="font-size:12px;display:none">Quitar</button>
+ </div>
+ </div>
+
+ <div id="f-peso-wrap">
+ <label>Peso vivo</label>
+ <div style="display:flex;gap:8px;align-items:flex-start">
+ <div style="flex:1">
+ <input type="number" id="f-peso" placeholder="398" min="150" max="700"/>
+ <p class="hint">kg — ingresa directo o calcula con mediciones</p>
+ </div>
+ <button class="btn-ghost" onclick="openPesoModal()" style="margin-top:0;white-space:nowrap;padding:11px 12px">📏 Medir</button>
+ </div>
+ </div>
+ <div id="f-peso-edit-note" class="hidden">
+ <div class="alert-box alert-info" style="margin-top:0;margin-bottom:12px">
+ <span class="alert-icon">⚖️</span>
+ <span>El peso se gestiona desde la pestaña <strong>⚖️ Peso</strong> para mantener el historial.</span>
+ </div>
+ </div>
+
+ <div class="row2">
+ <div><label>Edad (años)</label><input type="number" id="f-edad" value="8" min="1" max="30"/></div>
+ <div>
+ <label>Sexo / estado</label>
+ <select id="f-estado">
+ <option value="castrado">Castrado (capón)</option>
+ <option value="yegua_vacia">Yegua vacía</option>
+ <option value="yegua_gestante_temprana">Yegua gestante &lt;5 meses</option>
+ <option value="yegua_gestante_9">Yegua gestante 9 meses</option>
+ <option value="yegua_gestante_11">Yegua gestante 11 meses</option>
+ <option value="yegua_lactante_1">Yegua lactante 1–2 meses</option>
+ <option value="yegua_lactante_3">Yegua lactante 3–4 meses</option>
+ <option value="semental_no">Semental sin reproducción</option>
+ <option value="semental_si" selected>Semental en reproducción</option>
+ </select>
+ </div>
+ </div>
+
+ <label>¿Cuántos días a la semana se ensilla?</label>
+ <select id="f-dias">
+ <option value="0">0 días — descanso total (mantenimiento)</option>
+ <option value="1">1 día/semana</option>
+ <option value="2">2 días/semana</option>
+ <option value="3">3 días/semana</option>
+ <option value="4">4 días/semana</option>
+ <option value="5">5 días/semana</option>
+ <option value="6" selected>6 días/semana</option>
+ </select>
+ <p class="hint">1–6 días = ejercicio pesado. 0 días = mantenimiento sin trabajo.</p>
+
+ <div class="divider"></div>
+ <div class="card-title" style="margin-bottom:12px">Dieta disponible</div>
+
+ <label>Forraje principal</label>
+ <select id="f-forraje"></select>
+
+ <label>Concentrado energético principal</label>
+ <select id="f-concentrado"></select>
+
+ <label>Segundo concentrado / subproducto (opcional)</label>
+ <select id="f-concentrado2"><option value="ninguno">— Ninguno —</option></select>
+
+ <label>Número de raciones al día</label>
+ <select id="f-comidas">
+ <option value="2">2 raciones/día</option>
+ <option value="3" selected>3 raciones/día (recomendado)</option>
+ <option value="4">4 raciones/día</option>
+ </select>
+ <label>Aceite vegetal (por presupuesto)</label>
+ <select id="f-aceite">
+ <option value="0">Sin aceite</option>
+ <option value="100">100 ml/día</option>
+ <option value="200">200 ml/día</option>
+ <option value="250" selected>250 ml/día</option>
+ <option value="300">300 ml/día</option>
+ <option value="400">400 ml/día</option>
+ <option value="500">500 ml/día</option>
+ <option value="600">600 ml/día</option>
+ </select>
+
+ <button class="btn-primary" id="btn-guardar-caballo" onclick="saveHorse()">Guardar caballo</button>
+ <button class="btn-secondary hidden" id="btn-cancelar-edicion" onclick="cancelEdit()" style="width:100%;margin-top:8px">Cancelar</button>
+ <p id="save-msg" class="success-msg hidden">✓ Guardado correctamente</p>
+ </div>
+</div>
+
+</div><!-- .app -->
+
+<!-- ═══════════════ MODAL PESO ═══════════════ -->
+<div id="modal-peso" class="modal-overlay hidden" onclick="closePesoModal(event)">
+ <div class="modal" onclick="event.stopPropagation()">
+ <div class="modal-title">📏 Calcular peso por medición</div>
+ <div class="modal-sub">Fórmula — </div>
+ <div class="step-indicator">
+ <div class="step-dot active" id="sdot-0"></div>
+ <div class="step-dot" id="sdot-1"></div>
+ <div class="step-dot" id="sdot-2"></div>
+ </div>
+ <div id="modal-step-0">
+ <div class="step-visual">
+ <div class="icon">🐴</div>
+ <p><strong>Paso 1: Posición del caballo</strong><br/>Asegúrate de que el caballo esté parado en terreno plano, con las <strong>cuatro patas firmes</strong> y la cabeza en posición natural.</p>
+ </div>
+ <button class="btn-primary" onclick="modalStep(1)">Entendido →</button>
+ </div>
+ <div id="modal-step-1" class="hidden">
+ <div class="step-visual">
+ <div class="icon">📏</div>
+ <p><strong>Paso 2: Ubicación de la huincha</strong><br/>
+ • <strong>PT:</strong> Perímetro torácico justo detrás de la cruz (la parte más alta del lomo)<br/>
+ • <strong>LEI:</strong> Largo escápulo-isquial desde la punta del encuentro hasta la punta de la nalga</p>
+ </div>
+ <button class="btn-primary" onclick="modalStep(2)">Siguiente →</button>
+ </div>
+ <div id="modal-step-2" class="hidden">
+ <div class="step-visual">
+ <div class="icon">🎯</div>
+ <p><strong>Paso 3: Ajuste de tensión</strong><br/>La huincha debe estar <strong>firme sin presionar</strong> la piel. Si el caballo respira, espera a que exhale para tomar la medición.</p>
+ </div>
+ <div class="row2" style="margin-top:14px">
+ <div><label>PT — Perímetro torácico (cm)</label><input type="number" id="m-pt" placeholder="168" min="100" max="250"/></div>
+ <div><label>LEI — Largo escápulo-isquial (cm)</label><input type="number" id="m-lei" placeholder="152" min="80" max="220"/></div>
+ </div>
+ <div id="peso-calculado" class="alert-box alert-info hidden" style="margin-top:12px">
+ <span class="alert-icon">⚖️</span>
+ <div id="peso-calculado-text"></div>
+ </div>
+ <div id="segunda-medicion" class="alert-box alert-warn hidden" style="margin-top:10px">
+ <span class="alert-icon">⚠️</span>
+ <div>El peso calculado varía más de un 15% del promedio de la raza para esta categoría. Se recomienda tomar una <strong>segunda medición de confirmación</strong> antes de continuar.</div>
+ </div>
+ <button class="btn-primary" onclick="calcularPeso()">Calcular peso</button>
+ <button id="btn-usar-peso" class="btn-secondary hidden" onclick="usarPesoCalculado()" style="width:100%;margin-top:10px">Usar este peso</button>
+ </div>
+ </div>
+</div>
+
+<script>
+
+
+
+// ═══════════════════════════════════════════════════════
+// SANITIZACIÓN
+// ═══════════════════════════════════════════════════════
+function esc(str){
+ return String(str??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ═══════════════════════════════════════════════════════
+// SISTEMA DE PLANES Y CÓDIGOS
+// ═══════════════════════════════════════════════════════
+
+// Códigos válidos — puedes agregar más aquí
+const VALID_CODES = {
+ 'EN-PRE-2026-ALFA': {plan:'premium', expires:'2027-01-01'},
+ 'EN-PRE-2026-BETA': {plan:'premium', expires:'2027-01-01'},
+ 'EN-PRE-2026-GAMA': {plan:'premium', expires:'2027-01-01'},
+ 'EN-PRE-2026-DELT': {plan:'premium', expires:'2027-01-01'},
+ 'EN-PRE-2026-EPSL': {plan:'premium', expires:'2027-01-01'},
+ 'EN-PRE-2026-ZETA': {plan:'premium', expires:'2027-01-01'},
+ 'EN-PRE-2026-TETA': {plan:'premium', expires:'2027-01-01'},
+ 'EN-PRE-2026-IOTA': {plan:'premium', expires:'2027-01-01'},
+ 'EN-PRE-2026-KAPA': {plan:'premium', expires:'2027-01-01'},
+ 'EN-PRE-2026-LMBD': {plan:'premium', expires:'2027-01-01'},
+};
+
+const PLAN_LIMITS = {free:1, premium:Infinity};
+
+function getPlan() {
+ const p = localStorage.getItem('en_plan');
+ if (!p) return {type:'free', expires:null};
+ try { return JSON.parse(p); } catch { return {type:'free', expires:null}; }
+}
+
+function setPlan(type, expires, code) {
+ localStorage.setItem('en_plan', JSON.stringify({type, expires, code}));
+}
+
+function isPremium() {
+ const p = getPlan();
+ if (p.type !== 'premium') return false;
+ if (p.expires && new Date(p.expires) < new Date()) return false;
+ return true;
+}
+
+function getHorseLimit() {
+ return isPremium() ? PLAN_LIMITS.premium : PLAN_LIMITS.free;
+}
+
+function showOnboarding() {
+ document.getElementById('onboarding').classList.remove('hidden');
+ document.getElementById('ob-logo').src = APP_ICON;
+}
+
+function hideOnboarding() {
+ document.getElementById('onboarding').classList.add('hidden');
+ localStorage.setItem('en_onboarded', '1');
+}
+
+function activatePlan(type) {
+ setPlan(type, null, null);
+ hideOnboarding();
+ updatePlanChip();
+ renderHorseList();
+}
+
+function showCodigoModal() {
+ document.getElementById('modal-codigo').classList.remove('hidden');
+ document.getElementById('btn-close-codigo').classList.remove('hidden');
+ document.getElementById('codigo-input').value = '';
+ document.getElementById('codigo-error').classList.add('hidden');
+ setTimeout(() => document.getElementById('codigo-input').focus(), 200);
+}
+
+function closeCodigoModal(e) {
+ if (e && e.target !== document.getElementById('modal-codigo')) return;
+ document.getElementById('modal-codigo').classList.add('hidden');
+}
+
+function validateCodigo() {
+ const raw = document.getElementById('codigo-input').value.trim().toUpperCase();
+ const errEl = document.getElementById('codigo-error');
+ if (!raw) { errEl.textContent = 'Ingresa un código'; errEl.classList.remove('hidden'); return; }
+ const entry = VALID_CODES[raw];
+ if (!entry) { errEl.textContent = 'Código inválido. Verifica el código o contacta por WhatsApp.'; errEl.classList.remove('hidden'); return; }
+ if (new Date(entry.expires) < new Date()) { errEl.textContent = 'Este código ha expirado.'; errEl.classList.remove('hidden'); return; }
+ setPlan('premium', entry.expires, raw);
+ document.getElementById('modal-codigo').classList.add('hidden');
+ hideOnboarding();
+ updatePlanChip();
+ renderHorseList();
+ alert('Plan Premium activado. Bienvenido a EquiNutrición Premium.');
+}
+
+function updatePlanChip() {
+ const topbar = document.querySelector('.topbar-text p');
+ if (!topbar) return;
+ const p = getPlan();
+ if (p.type === 'premium') {
+ topbar.innerHTML = 'Plan Premium activo';
+ topbar.style.color = 'var(--accent2)';
+ } else {
+ topbar.innerHTML = 'Plan Gratuito — <a href="#" onclick="showOnboarding();return false;" style="color:var(--accent2)">Mejorar a Premium</a>';
+ }
+}
+
+
+const APP_ICON = "data:image/png;base64,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";
+// ═══════════════════════════════════════════════════════
+// MOTOR EQUINE 2007 — TABLAS REALES + INTERPOLACIÓN
+// Fuente: Nutrient Requirements of Horses 6th Ed. Table 16-1 a 16-5
+// ═══════════════════════════════════════════════════════
+
+const _TABLE = {
+ 200: {
+ mant_min:6.1, mant_avg:6.7, mant_elev:7.3,
+ light:8.0, moderate:9.3, heavy:10.7, very_heavy:13.8,
+ stal_no:7.3, stal_yes:8.7,
+ gest_early:6.7, gest_9:7.7, gest_11:8.6,
+ lact_1:12.7, lact_3:12.2,
+ cp_mant:252, cp_heavy:345, cp_stal:316
+ },
+ 400: {
+ mant_min:12.1, mant_avg:13.3, mant_elev:14.5,
+ light:16.0, moderate:18.6, heavy:21.3, very_heavy:27.6,
+ stal_no:14.5, stal_yes:17.4,
+ gest_early:13.3, gest_9:15.4, gest_11:17.1,
+ lact_1:25.4, lact_3:24.5,
+ cp_mant:504, cp_heavy:689, cp_stal:631
+ },
+ 500: {
+ mant_min:15.2, mant_avg:16.7, mant_elev:18.2,
+ light:20.0, moderate:23.3, heavy:26.6, very_heavy:34.5,
+ stal_no:18.2, stal_yes:21.8,
+ gest_early:16.7, gest_9:19.2, gest_11:21.4,
+ lact_1:31.7, lact_3:30.6,
+ cp_mant:630, cp_heavy:862, cp_stal:789
+ },
+ 600: {
+ mant_min:18.2, mant_avg:20.0, mant_elev:21.8,
+ light:24.0, moderate:28.0, heavy:32.0, very_heavy:41.4,
+ stal_no:21.8, stal_yes:26.1,
+ gest_early:20.0, gest_9:23.1, gest_11:25.7,
+ lact_1:38.1, lact_3:36.7,
+ cp_mant:756, cp_heavy:1034, cp_stal:947
+ },
+ 900: {
+ mant_min:27.3, mant_avg:30.0, mant_elev:32.7,
+ light:36.0, moderate:42.0, heavy:48.0, very_heavy:62.1,
+ stal_no:32.7, stal_yes:39.2,
+ gest_early:30.0, gest_9:34.6, gest_11:38.5,
+ lact_1:54.4, lact_3:52.4,
+ cp_mant:1134, cp_heavy:1551, cp_stal:1421
+ }
+};
+
+// Peso promedio raza por estado (para validación ±15%)
+const RAZA_PESO_REF = {
+ castrado:379, yegua_vacia:394, yegua_gestante_temprana:400,
+ yegua_gestante_9:427, yegua_gestante_11:453,
+ yegua_lactante_1:400, yegua_lactante_3:400,
+ semental_no:378, semental_si:378
+};
+
+function interp(w, key) {
+ const ws = Object.keys(_TABLE).map(Number).sort((a,b)=>a-b);
+ if (w <= ws[0]) return _TABLE[ws[0]][key];
+ if (w >= ws[ws.length-1]) return _TABLE[ws[ws.length-1]][key];
+ for (let i=0; i<ws.length-1; i++) {
+ const w1=ws[i], w2=ws[i+1];
+ if (w >= w1 && w <= w2) {
+ const t = (w-w1)/(w2-w1);
+ return _TABLE[w1][key] + t*(_TABLE[w2][key]-_TABLE[w1][key]);
+ }
+ }
+}
+
+function calc(horse) {
+ const w = getUltimoPeso(horse); // usa último pesaje si existe
+ const dias = parseInt(horse.dias) || 0;
+ const estado = horse.estado;
+
+ // Mantenimiento base (promedio = temperamento estándar del corralero)
+ const edMant = interp(w, 'mant_avg');
+
+ // Diferencial de ejercicio: 0 días = 0, 1–6 días = diferencial heavy 
+ const edHeavy = interp(w, 'heavy');
+ const diffEjercicio = dias > 0 ? (edHeavy - edMant) : 0;
+
+ // Diferencial reproductivo / estado
+ let diffEstado = 0;
+ const edStalYes = interp(w, 'stal_yes');
+ const edGest9 = interp(w, 'gest_9');
+ const edGest11 = interp(w, 'gest_11');
+ const edGestE = interp(w, 'gest_early');
+ const edLact1 = interp(w, 'lact_1');
+ const edLact3 = interp(w, 'lact_3');
+
+ if (estado === 'semental_si') diffEstado = edStalYes - edMant;
+ else if (estado === 'semental_no') diffEstado = 0;
+ else if (estado === 'yegua_gestante_9') diffEstado = edGest9 - edMant;
+ else if (estado === 'yegua_gestante_11') diffEstado = edGest11 - edMant;
+ else if (estado === 'yegua_gestante_temprana') diffEstado = edGestE - edMant;
+ else if (estado === 'yegua_lactante_1') diffEstado = edLact1 - edMant;
+ else if (estado === 'yegua_lactante_3') diffEstado = edLact3 - edMant;
+
+ const edTotal = edMant + diffEjercicio + diffEstado;
+
+ // Proteína cruda mínima (interpolada entre mantenimiento y heavy)
+ const cpMant = interp(w, 'cp_mant');
+ const cpHeavy = interp(w, 'cp_heavy');
+ const cpTotal = dias > 0 ? cpHeavy : cpMant;
+
+ return {
+ edTotal: Math.round(edTotal*100)/100,
+ edMant: Math.round(edMant*100)/100,
+ diffEjercicio: Math.round(diffEjercicio*100)/100,
+ diffEstado: Math.round(diffEstado*100)/100,
+ forrMin: Math.round(w*20/1000*100)/100, // kg MS/día
+ forrMax: Math.round(w*0.025*100)/100, // kg MS/día (techo 2.5% PV)
+ concCap: Math.round(w/100*0.5*100)/100, // kg/día cap 
+ starchLimitPerMeal: Math.round(w*4), // g/ración
+ cpTotal: Math.round(cpTotal),
+ peso: w, dias
+ };
+}
+
+function calcRation(horse, nrc) {
+ const foods = getAllFoods();
+ const f = foods[horse.forraje];
+ const c = foods[horse.concentrado];
+ const c2 = horse.concentrado2 && horse.concentrado2 !== 'ninguno' ? foods[horse.concentrado2] : null;
+ if (!f || !c) return null;
+
+ // 1. FORRAJE — entre mínimo y techo fisiológico
+ let forrKg = nrc.forrMin / f.ms; // convertir MS a kg tal como se entrega
+ const forrMaxKg = nrc.forrMax / f.ms;
+ let edForraje = forrKg * f.ed;
+ let deficit = nrc.edTotal - edForraje;
+
+ // 2. ACEITE — cantidad fija elegida por propietario
+ const aceite_ml = parseInt(horse.aceite) || 0;
+ const aceite_ed = aceite_ml / 1000 * 8.2;
+ deficit -= aceite_ed;
+
+ // 3. CONCENTRADO PRINCIPAL — cap ajustado por CC
+ let concKg = 0, conc2Kg = 0;
+ const ccScoreR = getUltimaCC(horse.id);
+ const ccAdjR = getCCFactor(ccScoreR);
+ const capTotal = nrc.concCap * ccAdjR.concFactor;
+
+ if (deficit > 0) {
+ if (c2) {
+ // Distribuir cap proporcionalmente: 60% concentrado principal, 40% secundario
+ const cap1 = capTotal * 0.6;
+ const cap2 = capTotal * 0.4;
+ concKg = Math.min(cap1, deficit * 0.6 / c.ed);
+ const ed1 = concKg * c.ed;
+ const def2 = deficit - ed1;
+ conc2Kg = def2 > 0 ? Math.min(cap2, def2 / c2.ed) : 0;
+ } else {
+ concKg = Math.min(capTotal, deficit / c.ed);
+ }
+ }
+
+ // Verificar si aún hay déficit tras cap
+ const edConc = concKg * c.ed + conc2Kg * (c2 ? c2.ed : 0);
+ const totalEd = edForraje + aceite_ed + edConc;
+ const deficitRestante = nrc.edTotal - totalEd;
+
+ // Si hay déficit, subir heno (prioridad en CC bajo 1-3, siempre antes que más concentrado)
+ let forrExtraKg = 0;
+ if (deficitRestante > 0.5) {
+ forrExtraKg = Math.min(forrMaxKg - forrKg, deficitRestante / f.ed);
+ forrKg += forrExtraKg;
+ }
+
+ const totalEdFinal = forrKg * f.ed + aceite_ed + edConc;
+ const coveragePct = Math.min(100, Math.round(totalEdFinal / nrc.edTotal * 100));
+ const defFinal = Math.max(0, nrc.edTotal - totalEdFinal);
+
+ // Almidón por ración
+ const starchPerMeal = (concKg * c.starch + conc2Kg * (c2 ? c2.starch : 0)) / 3;
+ const starchLimitKg = nrc.starchLimitPerMeal / 1000;
+ const starchWarn = starchPerMeal > starchLimitKg;
+
+ // Alertas
+ const alerts = [];
+ if (capTotal <= concKg + conc2Kg + 0.01)
+ alerts.push({type:'warn', icon:'⚡', msg:`Cap aplicado (${Math.round(capTotal*1000)} g/día). Para cubrir el déficit restante considera subir el aceite o agregar un segundo concentrado.`});
+ if (starchWarn)
+ alerts.push({type:'danger', icon:'🚨', msg:`Almidón por ración: ${Math.round(starchPerMeal*1000)} g — supera el límite de ${nrc.starchLimitPerMeal} g. Divide en más raciones o reduce el concentrado.`});
+ if (c.risk === 'high')
+ alerts.push({type:'warn', icon:'⚠️', msg:`${c.name} es de alto riesgo. Divide siempre en 3 raciones iguales y respeta el cap diario.`});
+ if (c2 && c2.risk === 'high')
+ alerts.push({type:'warn', icon:'⚠️', msg:`${c2.name} — correlación positiva con cólicos (). Techo máximo: 1 kg/día.`});
+ if (defFinal > 1)
+ alerts.push({type:'warn', icon:'💡', msg:`Déficit energético de ${defFinal.toFixed(1)} Mcal. Opciones: aumentar aceite, agregar segundo concentrado, o aumentar el heno sobre el mínimo.`});
+
+ return {
+ forrKg: Math.round(forrKg*100)/100,
+ concKg: Math.round(concKg*100)/100,
+ conc2Kg: Math.round(conc2Kg*100)/100,
+ aceite_ml,
+ totalEd: Math.round(totalEdFinal*100)/100,
+ coveragePct,
+ defFinal: Math.round(defFinal*100)/100,
+ alerts,
+ starchPerMealG: Math.round(starchPerMeal*1000)
+ };
+}
+
+// ═══════════════════════════════════════════════════════
+// BASE DE ALIMENTOS
+// ═══════════════════════════════════════════════════════
+const BASE_FOODS = {
+ heno_alfalfa: {name:'Heno de alfalfa', ed:2.2, starch:0.02, ms:0.88, unit:'kg', emoji:'🌿', type:'forraje', risk:'low', builtin:true, desc:'2.2 Mcal/kg · 2% almidón · forraje base'},
+ pasto_fresco: {name:'Pasto fresco', ed:2.5, starch:0.03, ms:0.25, unit:'kg', emoji:'🌱', type:'forraje', risk:'low', builtin:true, desc:'2.5 Mcal/kg · 3% almidón · 25% MS'},
+ avena: {name:'Avena en grano', ed:3.0, starch:0.44, ms:0.89, unit:'kg', emoji:'🌾', type:'concentrado', risk:'high', builtin:true, desc:'3.0 Mcal/kg · 44% almidón'},
+ maiz: {name:'Maíz molido', ed:3.4, starch:0.72, ms:0.88, unit:'kg', emoji:'🌽', type:'concentrado', risk:'high', builtin:true, desc:'3.4 Mcal/kg · 72% almidón — máx. riesgo'},
+ pellet: {name:'Pellet comercial',ed:2.8, starch:0.20, ms:0.90, unit:'kg', emoji:'🟤', type:'concentrado', risk:'med', builtin:true, desc:'2.8 Mcal/kg · 20% almidón'},
+ afrechillo_trigo: {name:'Afrechillo de trigo', ed:3.2, starch:0.22, ms:0.89, unit:'kg', emoji:'🟫', type:'subproducto', risk:'high', builtin:true, desc:'3.2 Mcal/kg · 22% almidón · r=0.7 cólicos (Bull 2019)'},
+ afrecho_trigo: {name:'Afrecho de trigo (salvado)', ed:3.4, starch:0.26, ms:0.89, unit:'kg', emoji:'🪵', type:'subproducto', risk:'high', builtin:true, desc:'3.4 Mcal/kg · 26% almidón · Correlación positiva con cólicos'},
+ aceite: {name:'Aceite vegetal', ed:8.2, starch:0.00, ms:1.00, unit:'ml', emoji:'🫙', type:'energia', risk:'low', builtin:true, desc:'8.2 Mcal/kg · 0% almidón — seguro'}
+};
+
+function getAllFoods() {
+ const custom = JSON.parse(localStorage.getItem('en_foods') || '[]');
+ const all = {...BASE_FOODS};
+ custom.forEach(f => { all[f.id] = f; });
+ return all;
+}
+function getCustomFoods() { return JSON.parse(localStorage.getItem('en_foods') || '[]'); }
+function saveCustomFoods(a) { localStorage.setItem('en_foods', JSON.stringify(a)); }
+function getHorses() { try { return JSON.parse(localStorage.getItem('en_horses') || '[]'); } catch { return []; } }
+function saveHorses(h) { localStorage.setItem('en_horses', JSON.stringify(h)); }
+function getSupls(id) { try { return JSON.parse(localStorage.getItem('en_supl_'+id) || '[]'); } catch { return []; } }
+function saveSupls(id, a) { localStorage.setItem('en_supl_'+id, JSON.stringify(a)); }
+function getPesajes(id){try{return JSON.parse(localStorage.getItem('en_peso_'+id)||'[]')}catch{return[]}}
+function savePesajes(id,a){localStorage.setItem('en_peso_'+id,JSON.stringify(a))}
+
+
+function getUltimaCC(horseId){
+ const arr = getCC(horseId);
+ if(!arr.length) return null;
+ return arr.sort((a,b)=>new Date(b.fecha)-new Date(a.fecha))[0].score;
+}
+
+function getCCFactor(cc){
+ if(!cc) return {edFactor:1.0, concFactor:1.0, label:null, tipo:null};
+ const n = parseInt(cc);
+ if(n<=3){
+ const ed = n===1?1.20:n===2?1.15:1.10;
+ return {edFactor:ed, concFactor:1.0, label:`CC ${n} — ración aumentada +${Math.round((ed-1)*100)}% para recuperación`, tipo:'bajo'};
+ }
+ if(n>=7){
+ const ed = n===7?0.90:n===8?0.85:0.80;
+ const cap = 0.5; // reduce cap concentrado a la mitad
+ const warn = n>=8?' — riesgo de laminitis':'';
+ return {edFactor:ed, concFactor:cap, label:`CC ${n} — ración reducida ${Math.round((1-ed)*100)}% por sobrepeso${warn}`, tipo:'alto'};
+ }
+ return {edFactor:1.0, concFactor:1.0, label:null, tipo:null};
+}
+
+function getUltimoPeso(horse){
+ const pesajes=getPesajes(horse.id);
+ if(!pesajes.length) return horse.peso;
+ return [...pesajes].sort((a,b)=>new Date(b.fecha)-new Date(a.fecha))[0].peso;
+}
+
+function getDiasDesdeUltimoPesaje(horse){
+ const pesajes=getPesajes(horse.id);
+ if(!pesajes.length) return null;
+ const ultimo=[...pesajes].sort((a,b)=>new Date(b.fecha)-new Date(a.fecha))[0];
+ return Math.floor((Date.now()-new Date(ultimo.fecha))/(1000*60*60*24));
+}
+
+function getReminderDismissed(horseId){
+ const val=localStorage.getItem('en_reminder_'+horseId);
+ if(!val) return false;
+ return Math.floor((Date.now()-parseInt(val))/(1000*60*60*24))<30;
+}
+function dismissReminder(horseId){
+ localStorage.setItem('en_reminder_'+horseId,Date.now().toString());
+ renderReminderBanners();
+}
+
+function renderReminderBanners(){
+ const horses=getHorses();
+ const el=document.getElementById('reminder-banners');
+ if(!el)return;
+ let html='';
+ horses.forEach(h=>{
+ const dias=getDiasDesdeUltimoPesaje(h);
+ const sinPesajes=dias===null;
+ const vencido=dias!==null&&dias>=30;
+ if((sinPesajes||vencido)&&!getReminderDismissed(h.id)){
+ const msg=sinPesajes
+ ?`<strong>${esc(h.nombre)}</strong> — sin pesajes registrados. Registra el primer peso para activar el seguimiento.`
+ :`<strong>${esc(h.nombre)}</strong> — último pesaje hace ${dias} días. Se recomienda pesar cada 30 días.`;
+ html+=`<div class="reminder-banner">
+ <div class="reminder-text">${msg}</div>
+ <button class="reminder-close" onclick="dismissReminder('${h.id}');event.stopPropagation()">✕</button>
+ </div>`;
+ }
+ });
+ el.innerHTML=html;
+}
+
+function toggleMetodoPeso(val) {
+  const guia = document.getElementById('guia-cinta');
+  if (guia) guia.style.display = val === 'cinta' ? 'block' : 'none';
+}
+
+function calcPesoDesdeMediacion() {
+  const pt = parseFloat(document.getElementById('p-pt')?.value);
+  const lei = parseFloat(document.getElementById('p-lei')?.value);
+  if (!pt || !lei) { alert('Ingresa ambas medidas (PT y LEI)'); return; }
+  const peso = Math.round((pt * pt * lei) / 11877);
+  document.getElementById('p-peso').value = peso;
+  const res = document.getElementById('p-calc-result');
+  res.textContent = `Peso calculado: ${peso} kg`;
+  res.classList.remove('hidden');
+}
+
+function savePesaje(){
+ if(!selectedId)return;
+ const fecha=document.getElementById('p-fecha').value;
+ const peso=parseFloat(document.getElementById('p-peso').value);
+ if(!fecha||!peso){alert('Completa fecha y peso');return}
+ const p={id:Date.now().toString(),fecha,peso,metodo:document.getElementById('p-metodo').value,notas:document.getElementById('p-notas').value.trim()};
+ const arr=getPesajes(selectedId);arr.push(p);savePesajes(selectedId,arr);
+ // Actualizar peso del caballo automáticamente
+ const horses=getHorses();
+ const idx=horses.findIndex(h=>h.id===selectedId);
+ if(idx>=0){horses[idx].peso=peso;saveHorses(horses);}
+ // Limpiar recordatorio
+ localStorage.removeItem('en_reminder_'+selectedId);
+ document.getElementById('p-peso').value='';
+ document.getElementById('p-notas').value='';
+ const msg=document.getElementById('pesaje-msg');msg.classList.remove('hidden');
+ setTimeout(()=>msg.classList.add('hidden'),3000);
+ renderPesoView();renderHorseList();renderReminderBanners();
+}
+
+function deletePesaje(horseId,pesajeId){
+ if(!confirm('¿Eliminar este pesaje?'))return;
+ const arr=getPesajes(horseId).filter(p=>p.id!==pesajeId);
+ savePesajes(horseId,arr);
+ const horses=getHorses();
+ const idx=horses.findIndex(h=>h.id===horseId);
+ if(idx>=0&&arr.length>0){
+ const ultimo=[...arr].sort((a,b)=>new Date(b.fecha)-new Date(a.fecha))[0];
+ horses[idx].peso=ultimo.peso;saveHorses(horses);
+ }
+ renderPesoView();renderHorseList();renderReminderBanners();
+}
+
+function renderPesoView(){
+ const h=getHorses().find(x=>x.id===selectedId);
+ document.getElementById('no-sel-peso').classList.toggle('hidden',!!h);
+ document.getElementById('peso-content').classList.toggle('hidden',!h);
+ if(!h)return;
+ document.getElementById('peso-horse-name').textContent=h.nombre;
+ const pesajes=getPesajes(selectedId).sort((a,b)=>new Date(a.fecha)-new Date(b.fecha));
+ const pesoActual=getUltimoPeso(h);
+ document.getElementById('peso-actual-display').textContent=pesoActual+' kg';
+ const dias=getDiasDesdeUltimoPesaje(h);
+ document.getElementById('peso-ultimo-registro').textContent=dias===null
+ ?'Sin pesajes — el peso del perfil se usa para los cálculos'
+ :`Último pesaje hace ${dias} día${dias!==1?'s':''} · ración actualizada automáticamente`;
+ if(!document.getElementById('p-fecha').value)
+ document.getElementById('p-fecha').value=new Date().toISOString().split('T')[0];
+ // Gráfico
+ const chartWrap=document.getElementById('peso-chart-wrap');
+ if(pesajes.length>=2){
+ chartWrap.classList.remove('hidden');
+ const pesos=pesajes.map(p=>p.peso);
+ const pMin=Math.min(...pesos)-5,pMax=Math.max(...pesos)+5;
+ document.getElementById('peso-chart').innerHTML=pesajes.slice(-8).map(p=>{
+ const pct=Math.round((p.peso-pMin)/(pMax-pMin)*100);
+ const d=new Date(p.fecha);
+ return`<div class="peso-bar-wrap">
+ <div style="font-size:9px;color:var(--text3);margin-bottom:2px">${p.peso}</div>
+ <div class="peso-bar" style="height:${Math.max(pct,8)}%"></div>
+ <div class="peso-bar-label">${d.getDate()}/${d.getMonth()+1}</div>
+ </div>`;
+ }).join('');
+ } else { chartWrap.classList.add('hidden'); }
+ // Lista
+ const el=document.getElementById('peso-list');
+ const noEl=document.getElementById('no-pesajes');
+ if(!pesajes.length){el.innerHTML='';noEl.classList.remove('hidden');return}
+ noEl.classList.add('hidden');
+ const metMap={directo:'Balanza',cinta:'Cinta métrica',estimado:'Estimado'};
+ el.innerHTML=[...pesajes].reverse().map((p,i,arr)=>{
+ const prev=arr[i+1];
+ let deltaHtml='';
+ if(prev){const diff=p.peso-prev.peso;
+ if(diff>0) deltaHtml=`<span class="peso-delta delta-up">▲ +${diff.toFixed(1)} kg</span>`;
+ else if(diff<0) deltaHtml=`<span class="peso-delta delta-down">▼ ${diff.toFixed(1)} kg</span>`;
+ else deltaHtml=`<span class="peso-delta delta-eq">= Sin cambio</span>`;
+ }
+ const d=new Date(p.fecha);
+ return`<div class="peso-row">
+ <div><div class="peso-fecha">${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()} · ${metMap[p.metodo]||p.metodo}${p.notas?' · '+esc(p.notas):''}</div></div>
+ <div style="display:flex;align-items:center;gap:8px">
+ <div><span class="peso-val">${p.peso} kg</span>${deltaHtml}</div>
+ <button class="btn-danger" onclick="deletePesaje('${selectedId}','${p.id}')" style="padding:4px 8px;font-size:11px">Eliminar</button>
+ </div>
+ </div>`;
+ }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// ESTADO GLOBAL
+// ═══════════════════════════════════════════════════════
+let selectedId = null;
+let pesoCalculado = null;
+
+// ═══════════════════════════════════════════════════════
+// RENDERIZADO: CABALLOS
+// ═══════════════════════════════════════════════════════
+const ESTADO_MAP = {
+ castrado:'Castrado', yegua_vacia:'Yegua vacía',
+ yegua_gestante_temprana:'Gest. temprana', yegua_gestante_9:'Gest. 9 meses',
+ yegua_gestante_11:'Gest. 11 meses', yegua_lactante_1:'Lact. 1–2 m',
+ yegua_lactante_3:'Lact. 3–4 m', semental_no:'Semental', semental_si:'Semental en reprod.'
+};
+
+function renderHorseList() {
+ const horses = getHorses();
+ const el = document.getElementById('horse-list');
+ const empty = document.getElementById('no-horses');
+ if (!horses.length) { el.innerHTML = ''; empty.classList.remove('hidden'); return; }
+ empty.classList.add('hidden');
+ el.innerHTML = horses.map(h => {
+ const nrc = calc(h);
+ const r = calcRation(h, nrc);
+ const sel = selectedId === h.id;
+ const suplN = getSupls(h.id).length;
+ const pesoActual = getUltimoPeso(h);
+ const ccActual = getUltimaCC(h.id);
+ const ccColor = ccActual ? (ccActual<=3?'var(--danger-text)':ccActual<=6?'var(--ok-text)':'var(--warn-text)') : 'var(--text3)';
+ const ccText = ccActual ? `CC ${ccActual}` : 'Sin CC';
+ let badge = '<span class="badge badge-ok">✓ Ración OK</span>';
+ if (r?.alerts?.some(a=>a.type==='danger')) badge = '<span class="badge badge-danger">⚠ Riesgo almidón</span>';
+ else if (r?.alerts?.length) badge = '<span class="badge badge-warn">⚡ Revisar</span>';
+ if (r?.coveragePct < 90) badge = '<span class="badge badge-warn">'+r.coveragePct+'% cobertura</span>';
+ return `<div class="horse-card${sel?' selected':''}" onclick="selectHorse('${h.id}')">
+ <div style="display:flex;justify-content:space-between;align-items:flex-start">
+ <div style="display:flex;align-items:center;gap:12px">
+ <img src="${h.foto||APP_ICON}" style="width:40px;height:40px;border-radius:10px;object-fit:cover;flex-shrink:0"/>
+ <div>
+ <div class="horse-name">${esc(h.nombre)}</div>
+ <div class="horse-meta">${pesoActual} kg · ${h.dias} días/sem · ${ESTADO_MAP[h.estado]||h.estado}${suplN?' · '+suplN:''}</div>
+ </div>
+ </div>
+ <div style="display:flex;flex-direction:column;align-items:flex-end;gap:7px">
+ ${badge}
+ <div style="display:flex;gap:6px">
+ <button class="btn-ghost" onclick="event.stopPropagation();openEditHorse('${h.id}')" style="padding:5px 9px;font-size:11px">✏️</button>
+ <button class="btn-danger" onclick="event.stopPropagation();deleteHorse('${h.id}')" style="padding:5px 9px;font-size:11px">Eliminar</button>
+ </div>
+ </div>
+ </div></div>`;
+ }).join('');
+}
+
+function selectHorse(id) {
+ selectedId = id;
+ renderHorseList();
+ showRacion();
+ showTab('racion');
+}
+
+function deleteHorse(id) {
+ if (!confirm('¿Eliminar este caballo?')) return;
+ saveHorses(getHorses().filter(h => h.id !== id));
+ localStorage.removeItem('en_supl_'+id);
+ if (selectedId === id) selectedId = null;
+ renderHorseList(); showRacion();
+}
+
+// ─── Helper: formatear peso (< 1 kg → gramos) ───
+function fmtPeso(kg) {
+ if (kg <= 0) return '0 g';
+ if (kg < 1) return Math.round(kg * 1000) + ' g';
+ return kg + ' kg';
+}
+function fmtPesoPorRacion(kg, n) {
+ const por = Math.round(kg / n * 1000) / 1000;
+ return fmtPeso(por);
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDERIZADO: RACIÓN
+// ═══════════════════════════════════════════════════════
+function showRacion() {
+ const h = getHorses().find(x => x.id === selectedId);
+ const foods = getAllFoods();
+ document.getElementById('no-sel-racion').classList.toggle('hidden', !!h);
+ document.getElementById('racion-content').classList.toggle('hidden', !h);
+ document.getElementById('no-sel-supl').classList.toggle('hidden', !!h);
+ document.getElementById('supl-content').classList.toggle('hidden', !h);
+ if (!h) return;
+
+ document.getElementById('supl-horse-name').textContent = h.nombre;
+
+ const nrc = calc(h);
+ const r = calcRation(h, nrc);
+ if (!r) return;
+
+ // Métricas
+ const pctColor = r.coveragePct >= 90 ? '#1D9E75' : r.coveragePct >= 75 ? '#f0b84a' : '#f08080';
+ // Nutrientes
+ // Proteína cruda estimada desde ingredientes de la ración
+ const foodsNutr = getAllFoods();
+ const fFood = foodsNutr[h.forraje];
+ const cFood = foodsNutr[h.concentrado];
+ const c2Food = h.concentrado2 && h.concentrado2!=='ninguno' ? foodsNutr[h.concentrado2] : null;
+ // CP% por tipo de alimento (valores promedio)
+ const cpPct = {heno_alfalfa:0.185,pasto_fresco:0.14,avena:0.13,maiz:0.09,pellet:0.14,afrechillo_trigo:0.155,afrecho_trigo:0.155};
+ const getCp = (food,key) => food ? (cpPct[key]||0.12) : 0;
+ const cpAportado = Math.round(
+ (r.forrKg * getCp(fFood,h.forraje) +
+ r.concKg * getCp(cFood,h.concentrado) +
+ (c2Food&&r.conc2Kg>0 ? r.conc2Kg*getCp(c2Food,h.concentrado2) : 0)) * 1000
+ );
+ const cpPct2 = Math.min(100, Math.round(cpAportado/nrc.cpTotal*100));
+ const cpColor = cpPct2>=100?'var(--accent)':cpPct2>=80?'#f0b84a':'#E24B4A';
+ document.getElementById('nutrient-grid').innerHTML = `
+ <div class="nutrient-item" style="grid-column:1/-1">
+ <div class="nutrient-label">Proteína cruda — requerimiento diario</div>
+ <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+ <div class="nutrient-val">${nrc.cpTotal} <span class="nutrient-unit">g/día requerido</span></div>
+ <div style="font-size:13px;font-weight:700;color:${cpColor}">${cpAportado} g aportado (${cpPct2}%)</div>
+ </div>
+ <div class="nutrient-bar"><div class="nutrient-fill" style="width:${cpPct2}%;background:${cpColor}"></div></div>
+ ${cpPct2<80?'<div style="font-size:11px;color:#f0b84a;margin-top:6px">Déficit de proteína. Considera agregar harina de soja o aumentar el heno de alfalfa.</div>':''}
+ </div>`;
+
+ document.getElementById('metrics-grid').innerHTML = `
+ <div class="metric accent">
+ <div class="mlabel">Energía requerida</div>
+ <div class="mvalue">${nrc.edTotal} <span class="munit">Mcal/día</span></div>
+ </div>
+ <div class="metric">
+ <div class="mlabel">Cobertura lograda</div>
+ <div class="mvalue" style="color:${pctColor}">${r.coveragePct}<span class="munit">%</span></div>
+ </div>
+ <div class="metric">
+ <div class="mlabel">Forraje mínimo</div>
+ <div class="mvalue">${nrc.forrMin} <span class="munit">kg MS/día</span></div>
+ </div>
+ <div class="metric">
+ <div class="mlabel">Almidón máx/ración</div>
+ <div class="mvalue">${nrc.starchLimitPerMeal} <span class="munit">g</span></div>
+ </div>`;
+
+
+
+ // Plan de comidas — número configurable por caballo
+ const f = foods[h.forraje], c = foods[h.concentrado];
+ const c2 = h.concentrado2 && h.concentrado2 !== 'ninguno' ? foods[h.concentrado2] : null;
+ const nComidas = parseInt(h.comidas) || 3;
+ const mealLabels = {
+ 2: ['Mañana', 'Tarde'],
+ 3: ['Mañana', 'Mediodía', 'Tarde'],
+ 4: ['Mañana', 'Media mañana', 'Mediodía', 'Tarde']
+ }[nComidas] || ['Mañana', 'Mediodía', 'Tarde'];
+
+ // Aceite distribuido en partes iguales
+ const aceiteTotal = r.aceite_ml;
+ const aceiteBase = aceiteTotal > 0 ? Math.floor(aceiteTotal / nComidas) : 0;
+ const aceiteResto = aceiteTotal > 0 ? aceiteTotal - aceiteBase * (nComidas - 1) : 0;
+
+ const mealBase = [
+ {n: f.name, a: fmtPesoPorRacion(r.forrKg, nComidas)},
+ {n: c.name, a: fmtPesoPorRacion(r.concKg, nComidas)},
+ ...(c2 && r.conc2Kg > 0 ? [{n: c2.name, a: fmtPesoPorRacion(r.conc2Kg, nComidas)}] : []),
+ ];
+
+ const meals = mealLabels.map((label, idx) => {
+ const ml = idx === nComidas - 1 ? aceiteResto : aceiteBase;
+ const items = [
+ ...mealBase,
+ ...(ml > 0 ? [{n: 'Aceite vegetal', a: ml+' ml'}] : []),
+ ...(idx === Math.floor(nComidas/2) ? [{n: 'Agua fresca', a: 'ad libitum'}] : [])
+ ];
+ return {t: label, items};
+ });
+
+ document.getElementById('meal-plan').innerHTML = meals.map(m => `
+ <div class="meal-card"><div class="meal-time">${m.t}</div>
+ ${m.items.map(i => `<div class="meal-row"><span>${i.n}</span><strong>${i.a}</strong></div>`).join('')}
+ </div>`).join('');
+
+ // Ingredientes + alertas
+ // Alerta condición corporal
+ const ccUlt = getUltimaCC(h.id);
+ const ccAdjView = getCCFactor(ccUlt);
+ let ccAlertHtml = '';
+ if(ccAdjView.tipo==='bajo'){
+ ccAlertHtml = `<div class="alert-box alert-warn"><div><strong>Condición corporal baja (CC ${ccUlt})</strong><br/>${ccAdjView.label}. La ración se incrementó para apoyar la recuperación. Prioriza el aumento de heno antes que concentrado.</div></div>`;
+ } else if(ccAdjView.tipo==='alto'){
+ const isLaminitis = parseInt(ccUlt)>=8;
+ ccAlertHtml = `<div class="alert-box alert-${isLaminitis?'danger':'warn'}"><div><strong>Condición corporal alta (CC ${ccUlt})</strong><br/>${ccAdjView.label}. El cap de concentrado se redujo a la mitad. ${isLaminitis?'Riesgo real de laminitis — consulta veterinaria.':''}</div></div>`;
+ } else if(!ccUlt){
+ ccAlertHtml = `<div class="alert-box alert-info"><div>Sin condición corporal registrada. Registra la CC en la pestaña C. Corporal para ajustar la ración automáticamente.</div></div>`;
+ }
+
+ let alertHtml = r.alerts.map(a =>
+ `<div class="alert-box alert-${a.type}"><div>${a.msg}</div></div>`
+ ).join('');
+
+ const rl = {low:'risk-low', med:'risk-med', high:'risk-high'};
+ const rn = {low:'Bajo riesgo', med:'Riesgo medio', high:'Alto riesgo'};
+
+ document.getElementById('ingredient-detail').innerHTML = `${ccAlertHtml}${alertHtml}
+ <div class="ing-row">
+ <div><div class="ing-name">${esc(f.name)}<span class="risk-tag ${rl[f.risk]}">${rn[f.risk]}</span></div><div class="ing-detail">${f.desc}</div></div>
+ <div class="ing-val">${fmtPeso(r.forrKg)}/día</div>
+ </div>
+ <div class="ing-row">
+ <div><div class="ing-name">${c.name}<span class="risk-tag ${rl[c.risk]}">${rn[c.risk]}</span></div><div class="ing-detail">${c.desc}</div></div>
+ <div class="ing-val">${fmtPeso(r.concKg)}/día</div>
+ </div>
+ ${c2 && r.conc2Kg > 0 ? `<div class="ing-row">
+ <div><div class="ing-name">${c2.name}<span class="risk-tag ${rl[c2.risk]}">${rn[c2.risk]}</span></div><div class="ing-detail">${c2.desc}</div></div>
+ <div class="ing-val">${fmtPeso(r.conc2Kg)}/día</div>
+ </div>` : ''}
+ ${r.aceite_ml > 0 ? `<div class="ing-row">
+ <div><div class="ing-name">Aceite vegetal<span class="risk-tag risk-low">Bajo riesgo</span></div><div class="ing-detail">8.2 Mcal/kg · 0% almidón</div></div>
+ <div class="ing-val">${r.aceite_ml} ml/día</div>
+ </div>` : ''}
+ <div class="prog-wrap">
+ <div class="prog-label"><span>Cobertura energética</span><span>${r.totalEd} / ${nrc.edTotal} Mcal</span></div>
+ <div class="prog-bar"><div class="prog-fill" style="width:${r.coveragePct}%;background:${pctColor}"></div></div>
+ </div>
+ ${r.starchPerMealG > 0 ? `<div class="prog-wrap" style="margin-top:8px">
+ <div class="prog-label"><span>Almidón por ración</span><span>${r.starchPerMealG} g / ${nrc.starchLimitPerMeal} g límite</span></div>
+ <div class="prog-bar"><div class="prog-fill" style="width:${Math.min(100,Math.round(r.starchPerMealG/nrc.starchLimitPerMeal*100))}%;background:${r.starchPerMealG>nrc.starchLimitPerMeal?'#f08080':'#1D9E75'}"></div></div>
+ </div>` : ''}`;
+
+ renderSupl();
+}
+
+// ═══════════════════════════════════════════════════════
+// SUPLEMENTOS
+// ═══════════════════════════════════════════════════════
+function renderSupl() {
+ if (!selectedId) return;
+ const supls = getSupls(selectedId);
+ const el = document.getElementById('supl-list');
+ const empty = document.getElementById('no-supl');
+ if (!supls.length) { el.innerHTML = ''; empty.classList.remove('hidden'); return; }
+ empty.classList.add('hidden');
+ const fMap = {diario:'Diario',cada2dias:'Cada 2 días',semanal:'Semanal',quincenal:'Quincenal',mensual:'Mensual',segun_necesidad:'Según necesidad'};
+ const vMap = {oral:'Oral (alimento)',oral_jeringa:'Oral (jeringa)',topico:'Tópico',im:'IM',iv:'IV'};
+ el.innerHTML = supls.map(s => `
+ <div class="supl-card">
+ <div style="display:flex;justify-content:space-between;align-items:flex-start">
+ <div>
+ <div class="supl-name">${esc(s.nombre)}</div>
+ <div class="supl-detail">${esc(s.marca)} · ${esc(s.dosis)} · ${fMap[s.frecuencia]||s.frecuencia} · ${vMap[s.via]||s.via}</div>
+ ${s.notas ? `<div class="supl-detail" style="margin-top:3px;font-style:italic">📝 ${esc(s.notas)}</div>` : ''}
+ </div>
+ <button class="btn-danger" onclick="deleteSupl('${s.id}')" style="padding:5px 9px;font-size:11px">Eliminar</button>
+ </div>
+ </div>`).join('');
+}
+
+function saveSupl() {
+ const nombre = document.getElementById('s-nombre').value.trim();
+ if (!nombre || !selectedId) return;
+ const s = {id:Date.now().toString(), nombre, marca:document.getElementById('s-marca').value.trim()||'—', dosis:document.getElementById('s-dosis').value.trim()||'—', frecuencia:document.getElementById('s-frecuencia').value, via:document.getElementById('s-via').value, notas:document.getElementById('s-notas').value.trim()};
+ const arr = getSupls(selectedId); arr.push(s); saveSupls(selectedId, arr);
+ ['s-nombre','s-marca','s-dosis','s-notas'].forEach(id => document.getElementById(id).value = '');
+ const msg = document.getElementById('supl-msg'); msg.classList.remove('hidden');
+ setTimeout(() => msg.classList.add('hidden'), 2500);
+ renderSupl(); renderHorseList();
+}
+
+function deleteSupl(id) {
+ if (!confirm('¿Eliminar este suplemento?')) return;
+ saveSupls(selectedId, getSupls(selectedId).filter(s => s.id !== id));
+ renderSupl(); renderHorseList();
+}
+
+// ═══════════════════════════════════════════════════════
+// ALIMENTOS
+// ═══════════════════════════════════════════════════════
+function renderFoodList() {
+ const foods = getAllFoods();
+ const groups = {forraje:'🌿 Forrajes', concentrado:'🌾 Concentrados', subproducto:'🟫 Subproductos de molinería', energia:'🫙 Suplementos energéticos'};
+ let html = '';
+ Object.entries(groups).forEach(([type, label]) => {
+ const items = Object.entries(foods).filter(([,f]) => f.type === type);
+ if (!items.length) return;
+ html += `<div class="sec-label">${label}</div>`;
+ items.forEach(([id,f]) => {
+ const rc = {low:'risk-low', med:'risk-med', high:'risk-high'}[f.risk||'low'];
+ const rn = {low:'Bajo riesgo', med:'Riesgo medio', high:'Alto riesgo'}[f.risk||'low'];
+ const del = f.builtin ? '' : `<button class="btn-danger" onclick="deleteFood('${id}')" style="padding:5px 9px;font-size:11px">Eliminar</button>`;
+ html += `<div class="food-item"><div><div class="food-name">${f.emoji||'🔹'} ${esc(f.name)}<span class="risk-tag ${rc}">${rn}</span></div><div class="food-detail">${f.desc||f.ed+' Mcal/kg'}</div></div>${del}</div>`;
+ });
+ });
+ document.getElementById('food-list').innerHTML = html;
+}
+
+function saveCustomFood() {
+ const nombre = document.getElementById('cf-nombre').value.trim();
+ const ed = parseFloat(document.getElementById('cf-ed').value);
+ const starch = parseFloat(document.getElementById('cf-starch').value) / 100;
+ const ms = parseFloat(document.getElementById('cf-ms').value) / 100;
+ if (!nombre || isNaN(ed) || isNaN(starch) || isNaN(ms)) return;
+ const id = 'custom_'+Date.now();
+ const f = {id, name:nombre, ed, starch, ms, unit:'kg', emoji:'🔹', type:document.getElementById('cf-tipo').value, risk:document.getElementById('cf-riesgo').value, builtin:false, desc:`${ed} Mcal/kg · ${Math.round(starch*100)}% almidón · personalizado`};
+ const arr = getCustomFoods(); arr.push(f); saveCustomFoods(arr);
+ ['cf-nombre','cf-ed','cf-starch','cf-ms'].forEach(id => document.getElementById(id).value = '');
+ const msg = document.getElementById('cf-msg'); msg.classList.remove('hidden');
+ setTimeout(() => msg.classList.add('hidden'), 2500);
+ renderFoodList(); updateFoodSelects();
+}
+
+function deleteFood(id) {
+ if (!confirm('¿Eliminar este alimento?')) return;
+ saveCustomFoods(getCustomFoods().filter(f => f.id !== id));
+ renderFoodList(); updateFoodSelects();
+}
+
+function updateFoodSelects() {
+ const foods = getAllFoods();
+ const forr = Object.entries(foods).filter(([,f]) => f.type === 'forraje');
+ const conc = Object.entries(foods).filter(([,f]) => f.type !== 'forraje' && f.type !== 'energia');
+ document.getElementById('f-forraje').innerHTML = forr.map(([k,f]) => `<option value="${k}">${f.emoji} ${esc(f.name)}</option>`).join('');
+ const concOpts = conc.map(([k,f]) => `<option value="${k}">${f.emoji} ${esc(f.name)}</option>`).join('');
+ document.getElementById('f-concentrado').innerHTML = concOpts;
+ document.getElementById('f-concentrado2').innerHTML = `<option value="ninguno">— Ninguno —</option>` + concOpts;
+}
+
+// ═══════════════════════════════════════════════════════
+// GUARDAR / EDITAR CABALLO
+// ═══════════════════════════════════════════════════════
+function openEditHorse(id) {
+ const h = getHorses().find(x => x.id === id);
+ if (!h) return;
+ selectedId = id;
+ updateFoodSelects();
+ document.getElementById('f-id').value = h.id;
+ document.getElementById('f-nombre').value = h.nombre;
+ document.getElementById('f-edad').value = h.edad;
+ document.getElementById('f-estado').value = h.estado;
+ document.getElementById('f-dias').value = h.dias;
+ document.getElementById('f-forraje').value = h.forraje;
+ document.getElementById('f-concentrado').value = h.concentrado;
+ document.getElementById('f-concentrado2').value = h.concentrado2 || 'ninguno';
+ document.getElementById('f-aceite').value = h.aceite;
+ document.getElementById('f-comidas').value = h.comidas || '3';
+ loadFotoEdit(h.foto||null);
+ // Ocultar campo peso, mostrar nota
+ document.getElementById('f-peso-wrap').classList.add('hidden');
+ document.getElementById('f-peso-edit-note').classList.remove('hidden');
+ document.getElementById('form-caballo-title').textContent = '✏️ Editar — '+h.nombre;
+ document.getElementById('btn-guardar-caballo').textContent = 'Guardar cambios';
+ document.getElementById('btn-cancelar-edicion').classList.remove('hidden');
+ showTab('nuevo');
+}
+
+function cancelEdit() {
+ document.getElementById('f-id').value = '';
+ document.getElementById('f-nombre').value = '';
+ document.getElementById('f-peso').value = '';
+ resetFotoForm();
+ document.getElementById('f-peso-wrap').classList.remove('hidden');
+ document.getElementById('f-peso-edit-note').classList.add('hidden');
+ document.getElementById('form-caballo-title').textContent = 'Registrar caballo';
+ document.getElementById('btn-guardar-caballo').textContent = 'Guardar caballo';
+ document.getElementById('btn-cancelar-edicion').classList.add('hidden');
+ showTab('caballos');
+}
+
+function saveHorse() {
+ const nombre = document.getElementById('f-nombre').value.trim();
+ const editId = document.getElementById('f-id').value;
+ const isEdit = !!editId;
+
+ if (!nombre) { alert('Ingresa el nombre del caballo'); return; }
+
+ // Verificar límite de plan
+ if (!isEdit) {
+ const limit = getHorseLimit();
+ const current = getHorses().length;
+ if (current >= limit) {
+ if (isPremium()) {
+ alert('Has alcanzado el límite del plan Premium.');
+ } else {
+ if (confirm('El plan gratuito permite 1 caballo.\n¿Deseas mejorar al plan Premium?')) {
+ showOnboarding();
+ }
+ }
+ return;
+ }
+ }
+
+ if (isEdit) {
+ // EDITAR caballo existente — no tocar el peso
+ const horses = getHorses();
+ const idx = horses.findIndex(h => h.id === editId);
+ if (idx < 0) return;
+ horses[idx] = {
+ ...horses[idx],
+ nombre,
+ edad: parseInt(document.getElementById('f-edad').value) || 8,
+ estado: document.getElementById('f-estado').value,
+ dias: document.getElementById('f-dias').value,
+ forraje: document.getElementById('f-forraje').value,
+ concentrado: document.getElementById('f-concentrado').value,
+ concentrado2: document.getElementById('f-concentrado2').value,
+ aceite: document.getElementById('f-aceite').value,
+ comidas: document.getElementById('f-comidas').value,
+ foto: fotoDataUrl !== null ? fotoDataUrl : horses[idx].foto
+ };
+ saveHorses(horses);
+ const msg = document.getElementById('save-msg'); msg.classList.remove('hidden');
+ setTimeout(() => { msg.classList.add('hidden'); cancelEdit(); }, 1500);
+ } else {
+ // CREAR caballo nuevo
+ const peso = parseFloat(document.getElementById('f-peso').value);
+ if (!peso) { alert('Completa el peso del caballo'); return; }
+ const h = {
+ id: Date.now().toString(), nombre, peso,
+ edad: parseInt(document.getElementById('f-edad').value) || 8,
+ estado: document.getElementById('f-estado').value,
+ dias: document.getElementById('f-dias').value,
+ forraje: document.getElementById('f-forraje').value,
+ concentrado: document.getElementById('f-concentrado').value,
+ concentrado2: document.getElementById('f-concentrado2').value,
+ aceite: document.getElementById('f-aceite').value,
+ comidas: document.getElementById('f-comidas').value,
+ foto: fotoDataUrl || null
+ };
+ const horses = getHorses(); horses.push(h); saveHorses(horses);
+ const msg = document.getElementById('save-msg'); msg.classList.remove('hidden');
+ setTimeout(() => {
+ msg.classList.add('hidden');
+ document.getElementById('f-nombre').value = '';
+ document.getElementById('f-peso').value = '';
+ resetFotoForm();
+ showTab('caballos');
+ }, 1500);
+ }
+}
+
+// ═══════════════════════════════════════════════════════
+// MODAL DE PESO (3 PASOS)
+// ═══════════════════════════════════════════════════════
+let modalStepN = 0;
+function openPesoModal() {
+ modalStepN = 0;
+ document.getElementById('modal-peso').classList.remove('hidden');
+ modalStep(0);
+}
+function closePesoModal(e) {
+ if (e.target === document.getElementById('modal-peso')) document.getElementById('modal-peso').classList.add('hidden');
+}
+function modalStep(n) {
+ [0,1,2].forEach(i => {
+ document.getElementById('modal-step-'+i).classList.toggle('hidden', i !== n);
+ document.getElementById('sdot-'+i).className = 'step-dot' + (i < n ? ' done' : i === n ? ' active' : '');
+ });
+ modalStepN = n;
+}
+function calcularPeso() {
+ const pt = parseFloat(document.getElementById('m-pt').value);
+ const lei = parseFloat(document.getElementById('m-lei').value);
+ if (!pt || !lei) { alert('Ingresa ambas medidas'); return; }
+ const peso = Math.round((pt * pt * lei) / 11877);
+ pesoCalculado = peso;
+ const estado = document.getElementById('f-estado').value;
+ const ref = RAZA_PESO_REF[estado] || 384;
+ const diff = Math.abs(peso - ref) / ref;
+ const boxCalc = document.getElementById('peso-calculado');
+ const boxSegunda = document.getElementById('segunda-medicion');
+ const btnUsar = document.getElementById('btn-usar-peso');
+ boxCalc.classList.remove('hidden');
+ document.getElementById('peso-calculado-text').innerHTML = `<strong>Peso calculado: ${peso} kg</strong><br/>Fórmula: (PT² × LEI) / 11.877 = (${pt}² × ${lei}) / 11.877`;
+ if (diff > 0.15) {
+ boxSegunda.classList.remove('hidden');
+ } else {
+ boxSegunda.classList.add('hidden');
+ }
+ btnUsar.classList.remove('hidden');
+}
+function usarPesoCalculado() {
+ if (pesoCalculado) {
+ document.getElementById('f-peso').value = pesoCalculado;
+ document.getElementById('modal-peso').classList.add('hidden');
+ }
+}
+
+
+// ═══════════════════════════════════════════════════════
+// CONDICIÓN CORPORAL HENNEKE 1-9
+// ═══════════════════════════════════════════════════════
+const CC_DATA = {
+ 1: {label:'Emaciado', color:'#E24B4A',
+ desc:'El caballo se ve esquelético. Al mirarlo de lejos puedes contar claramente cada costilla y ver los huesos de la cadera y el lomo como si fueran cuchillas bajo la piel. El cuello está muy delgado y el rabo se ve completamente huesudo. Urgente: requiere atención veterinaria inmediata.',
+ guia:'Costillas: se ven todas claramente. Lomo: huesos muy salientes. Cadera: huesos de punta muy marcados. Cuello: muy delgado, sin relleno.'},
+ 2: {label:'Muy flaco', color:'#E24B4A',
+ desc:'El caballo está muy delgado. Las costillas se ven fácilmente sin necesidad de tocarlo. Los huesos del lomo sobresalen. La cadera tiene los huesos marcados. Hay muy poca carne cubriendo el esqueleto.',
+ guia:'Costillas: visibles sin palpar. Lomo: huesos prominentes. Cadera: huesos marcados. Cuello: delgado con poca musculatura.'},
+ 3: {label:'Flaco', color:'#f0b84a',
+ desc:'Está bajo de peso. Al pasar la mano por el costado, sientes las costillas con muy poco esfuerzo, casi sin presionar. Los huesos del lomo se ven un poco. La parte trasera (nalga) está hundida. Se necesita aumentar la ración.',
+ guia:'Costillas: se sienten fácil al tocar sin presionar. Lomo: ligeramente saliente. Cadera: un poco hundida. Cuello: delgado.'},
+ 4: {label:'Levemente bajo', color:'#f0b84a',
+ desc:'Está un poco bajo de peso, pero no de forma alarmante. Al pasar la mano por las costillas las sientes claramente, pero debes hacer un poco de presión. El cuello empieza a verse más lleno. La zona del lomo está casi plana.',
+ guia:'Costillas: se sienten con leve presión. Lomo: casi plano. Cadera: levemente marcada. Cuello: empieza a tener relleno.'},
+ 5: {label:'Ideal', color:'#1D9E75',
+ desc:'Condición perfecta para un caballo de trabajo. Al pasar la mano por el costado con presión normal sientes las costillas, pero no las ves al mirarlo parado. El lomo está plano. La cadera está bien redondeada y no tiene huesos muy salientes. El cuello tiene buen volumen.',
+ guia:'Costillas: se sienten al presionar pero NO se ven. Lomo: plano. Cadera: redondeada. Cuello: bien formado y musculoso.'},
+ 6: {label:'Ideal+', color:'#1D9E75',
+ desc:'Condición muy buena, ligeramente por encima del ideal. Las costillas están bien cubiertas y cuesta un poco más sentirlas. El lomo se ve levemente redondeado. El cuello comienza a verse más lleno por arriba. Buena condición para competencia.',
+ guia:'Costillas: se sienten con algo de presión. Lomo: levemente redondeado. Cadera: bien cubierta. Cuello: empieza a mostrar un leve rollo arriba.'},
+ 7: {label:'Gordo', color:'#f0b84a',
+ desc:'Está pasado de peso. Para sentir las costillas tienes que apretar bastante con los dedos. El cuello tiene un rollo de grasa visible en la parte de arriba. La zona del lomo está acolchada y redondeada. La cola tiene grasa alrededor de la base. Hay que reducir la ración.',
+ guia:'Costillas: se sienten solo con presión fuerte. Lomo: acolchado. Cuello: rollo de grasa visible arriba. Cola: base con grasa notoria.'},
+ 8: {label:'Obeso', color:'#E24B4A',
+ desc:'Muy pasado de peso. Casi no puedes sentir las costillas aunque aprietes con fuerza. El rollo de grasa en el cuello es notorio. La zona de la cola está muy acolchada. La parte trasera y los hombros están llenos de grasa. Riesgo real de laminitis. Reducir ración urgente.',
+ guia:'Costillas: muy difíciles de sentir. Cuello: rollo de grasa marcado. Cola: base muy acolchada. Cuerpo: figura redondeada y llena.'},
+ 9: {label:'Obesidad', color:'#E24B4A',
+ desc:'Obesidad extrema. No puedes sentir las costillas aunque lo intentes. Hay bolsas de grasa visibles en varios lugares del cuerpo. El cuello tiene un rollo de grasa enorme. El caballo se mueve con dificultad. Riesgo severo de laminitis, síndrome metabólico y problemas articulares. Consulta veterinaria urgente.',
+ guia:'Costillas: imperceptibles. Bolsas de grasa: visibles en cuello, lomo, cadera y cola. Movimiento: lento y esforzado.'}
+};
+
+let ccSelected = null;
+
+function getCC(horseId){try{return JSON.parse(localStorage.getItem('en_cc_'+horseId)||'[]')}catch{return[]}}
+function saveCC_data(horseId,a){localStorage.setItem('en_cc_'+horseId,JSON.stringify(a))}
+
+function renderCCView() {
+ const h = getHorses().find(x => x.id === selectedId);
+ document.getElementById('no-sel-cc').classList.toggle('hidden', !!h);
+ document.getElementById('cc-content').classList.toggle('hidden', !h);
+ if (!h) return;
+ document.getElementById('cc-horse-name').textContent = h.nombre;
+ ccSelected = null;
+
+ // Grid de puntuaciones
+ document.getElementById('cc-grid').innerHTML = Object.entries(CC_DATA).map(([n, d]) =>
+ `<div class="cc-card" id="cc-${n}" onclick="selectCC(${n})">
+ <div class="cc-num" style="color:${d.color}">${n}</div>
+ <div class="cc-label">${d.label}</div>
+ </div>`
+ ).join('');
+
+ renderCCHistory();
+}
+
+function selectCC(n) {
+ ccSelected = n;
+ Object.keys(CC_DATA).forEach(k => {
+ document.getElementById('cc-'+k)?.classList.toggle('selected', parseInt(k) === n);
+ });
+ const d = CC_DATA[n];
+ document.getElementById('cc-desc').innerHTML =
+ `<strong style="color:${d.color}">${n} — ${d.label}</strong><br/><br/>${d.desc}<br/><br/><span style="font-size:11px;color:var(--text3);font-weight:600">QUÉ MIRAR:</span><br/><span style="font-size:12px;color:var(--text3)">${d.guia}</span>`;
+ const pct = ((n-1)/8*100).toFixed(0);
+ document.getElementById('cc-dot').style.left = `calc(${pct}% - 8px)`;
+}
+
+function saveCC() {
+ if (!ccSelected || !selectedId) { alert('Selecciona una puntuación primero'); return; }
+ const arr = getCC(selectedId);
+ arr.push({id:Date.now().toString(), fecha:new Date().toISOString().split('T')[0], score:ccSelected, label:CC_DATA[ccSelected].label});
+ saveCC_data(selectedId, arr);
+ const msg = document.getElementById('cc-msg'); msg.classList.remove('hidden');
+ setTimeout(() => msg.classList.add('hidden'), 2500);
+ renderCCHistory();
+ renderHorseList();
+}
+
+function renderCCHistory() {
+ const arr = getCC(selectedId).sort((a,b) => new Date(b.fecha)-new Date(a.fecha));
+ const el = document.getElementById('cc-history');
+ const noEl = document.getElementById('no-cc');
+ if (!arr.length) { el.innerHTML=''; noEl.classList.remove('hidden'); return; }
+ noEl.classList.add('hidden');
+ el.innerHTML = arr.map(r => {
+ const d = CC_DATA[r.score];
+ const fecha = new Date(r.fecha);
+ return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid var(--border)">
+ <div>
+ <div style="font-size:13px;color:var(--text2)">${fecha.getDate()}/${fecha.getMonth()+1}/${fecha.getFullYear()}</div>
+ </div>
+ <div style="display:flex;align-items:center;gap:10px">
+ <div style="font-size:20px;font-weight:800;color:${d.color}">${r.score}</div>
+ <div style="font-size:12px;color:var(--text3)">${d.label}</div>
+ <button class="btn-danger" onclick="deleteCC('${r.id}')" style="padding:4px 8px;font-size:11px">Eliminar</button>
+ </div>
+ </div>`;
+ }).join('');
+}
+
+function deleteCC(id) {
+ if (!confirm('¿Eliminar este registro?')) return;
+ saveCC_data(selectedId, getCC(selectedId).filter(r => r.id !== id));
+ renderCCHistory();
+}
+
+
+// ═══════════════════════════════════════════════════════
+// FOTO DEL EJEMPLAR
+// ═══════════════════════════════════════════════════════
+let fotoDataUrl = null;
+
+function handleFoto(event) {
+ const file = event.target.files[0];
+ if (!file) return;
+ const reader = new FileReader();
+ reader.onload = (e) => {
+ const img = new Image();
+ img.onload = () => {
+ const canvas = document.createElement('canvas');
+ const MAX = 300;
+ let w = img.width, h = img.height;
+ if (w > h) { if (w > MAX) { h = h*MAX/w; w = MAX; } }
+ else { if (h > MAX) { w = w*MAX/h; h = MAX; } }
+ canvas.width = w; canvas.height = h;
+ canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+ fotoDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+ const preview = document.getElementById('foto-preview');
+ preview.src = fotoDataUrl;
+ preview.classList.remove('hidden');
+ document.getElementById('foto-placeholder').style.display = 'none';
+ document.getElementById('btn-quitar-foto').style.display = 'inline-block';
+ };
+ img.src = e.target.result;
+ };
+ reader.readAsDataURL(file);
+}
+
+function quitarFoto() {
+ fotoDataUrl = null;
+ document.getElementById('foto-preview').classList.add('hidden');
+ document.getElementById('foto-preview').src = '';
+ document.getElementById('foto-placeholder').style.display = 'flex';
+ document.getElementById('btn-quitar-foto').style.display = 'none';
+ document.getElementById('foto-input').value = '';
+}
+
+function resetFotoForm() {
+ fotoDataUrl = null;
+ const preview = document.getElementById('foto-preview');
+ preview.classList.add('hidden'); preview.src = '';
+ document.getElementById('foto-placeholder').style.display = 'flex';
+ document.getElementById('btn-quitar-foto').style.display = 'none';
+ document.getElementById('foto-input').value = '';
+}
+
+function loadFotoEdit(foto) {
+ if (foto) {
+ fotoDataUrl = foto;
+ const preview = document.getElementById('foto-preview');
+ preview.src = foto; preview.classList.remove('hidden');
+ document.getElementById('foto-placeholder').style.display = 'none';
+ document.getElementById('btn-quitar-foto').style.display = 'inline-block';
+ } else { resetFotoForm(); }
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPORTACIÓN PNG Y PDF
+// ═══════════════════════════════════════════════════════
+function buildRacionData() {
+  const h = getHorses().find(x => x.id === selectedId);
+  if (!h) return null;
+  const foods = getAllFoods();
+  const nrc = calc(h);
+  const r = calcRation(h, nrc);
+  if (!r) return null;
+  const f  = foods[h.forraje];
+  const cv  = foods[h.concentrado];
+  const c2 = h.concentrado2 && h.concentrado2 !== 'ninguno' ? foods[h.concentrado2] : null;
+  const nComidas = parseInt(h.comidas) || 3;
+  const mealLabels = {2:['Mañana','Tarde'],3:['Mañana','Mediodía','Tarde'],4:['Mañana','Media mañana','Mediodía','Tarde']}[nComidas]||['Mañana','Mediodía','Tarde'];
+  const aceiteBase = r.aceite_ml > 0 ? Math.floor(r.aceite_ml/nComidas) : 0;
+  const aceiteResto = r.aceite_ml > 0 ? r.aceite_ml - aceiteBase*(nComidas-1) : 0;
+  const meals = mealLabels.map((label,idx) => {
+    const ml = idx===nComidas-1 ? aceiteResto : aceiteBase;
+    return {time:label, items:[
+      {n:f.name, a:fmtPesoPorRacion(r.forrKg,nComidas)},
+      {n:cv.name, a:fmtPesoPorRacion(r.concKg,nComidas)},
+      ...(c2&&r.conc2Kg>0?[{n:c2.name,a:fmtPesoPorRacion(r.conc2Kg,nComidas)}]:[]),
+      ...(ml>0?[{n:'Aceite vegetal',a:ml+' ml'}]:[]),
+      ...(idx===Math.floor(nComidas/2)?[{n:'Agua fresca',a:'ad libitum'}]:[])
+    ]};
+  });
+  const fecha = new Date().toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'numeric'});
+  return {horse:h, nrc, r, meals, fecha, nComidas};
+}
+function exportarPNG() {
+ const data = buildRacionData();
+ if (!data) return;
+ const {horse, nrc, r, meals, fecha} = data;
+
+ const W=800, pad=40, lineH=26, titleH=36, mealGap=18;
+ // Calcular altura total
+ let totalLines = 0;
+ meals.forEach(m => { totalLines += 1 + m.items.length; });
+ const H = pad*2 + 90 + meals.length*(titleH+mealGap) + totalLines*lineH + 60;
+
+ const canvas = document.getElementById('export-canvas');
+ canvas.width=W; canvas.height=H;
+ const ctx = canvas.getContext('2d');
+
+ // Fondo
+ ctx.fillStyle='#0d0d0b'; ctx.fillRect(0,0,W,H);
+
+ // Header con logo color
+ ctx.fillStyle='#1D9E75';
+ ctx.beginPath(); ctx.roundRect(pad,pad,W-pad*2,70,12); ctx.fill();
+
+ ctx.fillStyle='#ffffff';
+ ctx.font='bold 22px -apple-system, Arial, sans-serif';
+ ctx.fillText('EquiNutrición — Plan de Ración Diaria',pad+16,pad+28);
+ ctx.font='14px -apple-system, Arial, sans-serif';
+ ctx.fillStyle='rgba(255,255,255,0.85)';
+ ctx.fillText(`${horse.nombre} · ${getUltimoPeso(horse)} kg · ${horse.dias} días/sem · ${fecha}`,pad+16,pad+52);
+
+ let y = pad + 90;
+
+ meals.forEach(meal => {
+ // Título de comida
+ ctx.fillStyle='#25c490';
+ ctx.font='bold 15px -apple-system, Arial, sans-serif';
+ ctx.fillText(meal.time, pad, y);
+ y += titleH;
+
+ // Items
+ meal.items.forEach(item => {
+ // Línea separadora
+ ctx.strokeStyle='#2a2a26'; ctx.lineWidth=1;
+ ctx.beginPath(); ctx.moveTo(pad,y-8); ctx.lineTo(W-pad,y-8); ctx.stroke();
+ ctx.fillStyle='#a8a79f';
+ ctx.font='14px -apple-system, Arial, sans-serif';
+ ctx.fillText(item.n, pad+8, y+4);
+ ctx.fillStyle='#f0efe8';
+ ctx.font='bold 14px -apple-system, Arial, sans-serif';
+ ctx.fillText(item.a, W-pad-ctx.measureText(item.a).width, y+4);
+ y += lineH;
+ });
+ y += mealGap;
+ });
+
+ // Footer
+ ctx.fillStyle='#6a6a62';
+ ctx.font='12px -apple-system, Arial, sans-serif';
+ ctx.fillText(`Cobertura energética: ${r.totalEd} / ${nrc.edTotal} Mcal (${r.coveragePct}%) · Generado con EquiNutrición`, pad, y+20);
+
+ // Descargar
+ const link = document.createElement('a');
+ link.download = `racion_${horse.nombre.replace(/\s/g,'_')}_${fecha.replace(/\//g,'-')}.png`;
+ link.href = canvas.toDataURL('image/png');
+ link.click();
+
+ const msg = document.getElementById('export-msg'); msg.classList.remove('hidden');
+ setTimeout(()=>msg.classList.add('hidden'),3000);
+}
+
+function exportarPDF() {
+ const data = buildRacionData();
+ if (!data) return;
+ const {horse, nrc, r, meals, fecha} = data;
+
+ // Construir HTML para la ventana de impresión
+ const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>
+ <title>Ración ${esc(horse.nombre)}</title>
+ <style>
+ body{font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#1a1a18}
+ .header{background:#1D9E75;color:#fff;padding:16px 20px;border-radius:10px;margin-bottom:20px}
+ .header h1{font-size:18px;margin:0 0 4px}
+ .header p{font-size:12px;margin:0;opacity:.9}
+ .meal{margin-bottom:18px;page-break-inside:avoid}
+ .meal-title{font-size:13px;font-weight:700;color:#1D9E75;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+ .meal-row{display:flex;justify-content:space-between;border-top:1px solid #e0dfdb;padding:6px 8px;font-size:13px}
+ .meal-row:first-of-type{border-top:none}
+ .meal-row span{color:#5a5a56}
+ .meal-row strong{color:#1a1a18}
+ .footer{font-size:11px;color:#9a9a94;margin-top:20px;border-top:1px solid #e0dfdb;padding-top:10px}
+ @media print{body{padding:12px}}
+ </style></head><body>
+ <div class="header">
+ <h1>EquiNutrición — Plan de Ración Diaria</h1>
+ <p>${esc(horse.nombre)} · ${getUltimoPeso(horse)} kg · ${horse.dias} días/sem · ${fecha}</p>
+ </div>
+ ${meals.map(m=>`
+ <div class="meal">
+ <div class="meal-title">${esc(m.time)}</div>
+ ${m.items.map(i=>`<div class="meal-row"><span>${esc(i.n)}</span><strong>${esc(i.a)}</strong></div>`).join('')}
+ </div>`).join('')}
+ <div class="footer">
+ Cobertura energética: ${r.totalEd} / ${nrc.edTotal} Mcal (${r.coveragePct}%) · Generado con EquiNutrición · laguirrevet.github.io/equinutricion
+ </div>
+ <script>window.onload=()=>{window.print();}<\/script>
+ </body></html>`;
+
+ const win = window.open('','_blank');
+ win.document.write(html);
+ win.document.close();
+
+ const msg = document.getElementById('export-msg'); msg.classList.remove('hidden');
+ setTimeout(()=>msg.classList.add('hidden'),3000);
+}
+
+// ═══════════════════════════════════════════════════════
+// NAVEGACIÓN
+// ═══════════════════════════════════════════════════════
+function showTab(tab) {
+ ['caballos','racion','condicion','suplementos','peso','alimentos','nuevo'].forEach(t => {
+ document.getElementById('view-'+t).classList.toggle('hidden', t !== tab);
+ document.getElementById('tab-'+t).classList.toggle('active', t === tab);
+ });
+ if (tab === 'caballos') { renderHorseList(); renderReminderBanners(); }
+ if (tab === 'racion') showRacion();
+ if (tab === 'alimentos') renderFoodList();
+ if (tab === 'condicion') renderCCView();
+ if (tab === 'suplementos') renderSupl();
+ if (tab === 'peso') renderPesoView();
+}
+
+// ═══════════════════════════════════════════════════════
+// PWA
+// ═══════════════════════════════════════════════════════
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+ e.preventDefault(); deferredPrompt = e;
+ document.getElementById('install-banner').classList.remove('hidden');
+});
+function installPWA() {
+ if (!deferredPrompt) return;
+ deferredPrompt.prompt();
+ deferredPrompt.userChoice.then(() => {
+ deferredPrompt = null;
+ document.getElementById('install-banner').classList.add('hidden');
+ });
+}
+window.addEventListener('appinstalled', () => document.getElementById('install-banner').classList.add('hidden'));
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+
+// INIT
+updateFoodSelects();
+renderHorseList();
+renderReminderBanners();
+document.getElementById('topbar-logo-img').src = APP_ICON;
+document.getElementById('ob-logo').src = APP_ICON;
+updatePlanChip();
+// Mostrar onboarding si es primera vez
+if (!localStorage.getItem('en_onboarded')) {
+ showOnboarding();
+}
+</script>
+</body>
+</html>
