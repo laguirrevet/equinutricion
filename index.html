@@ -276,6 +276,12 @@ input,select{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,25
 .success-msg{background:rgba(29,158,117,.12);border:1px solid rgba(29,158,117,.24);padding:10px 12px;border-radius:12px;color:var(--ok-text)}
 .alert-box{border-radius:14px}
 .peso-chart{padding-top:6px}
+
+/* BOTÓN FLOTANTE AGREGAR CABALLO */
+.fab-add{position:fixed;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(20px + var(--safe-bot));width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;font-size:28px;line-height:1;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 24px rgba(29,158,117,.35);cursor:pointer;z-index:20;transition:transform .16s ease,box-shadow .16s ease}
+.fab-add:hover{transform:translateY(-2px) scale(1.04)}
+.fab-add:active{transform:scale(.94)}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -403,7 +409,6 @@ input,select{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,25
  <button class="tab" onclick="showTab('suplementos')" id="tab-suplementos">Supl.</button>
  <button class="tab" onclick="showTab('peso')" id="tab-peso">⚖️ Peso</button>
  <button class="tab" onclick="showTab('alimentos')" id="tab-alimentos">Alimentos</button>
- <button class="tab" onclick="showTab('nuevo')" id="tab-nuevo">+ Caballo</button>
 </div>
 
 <!-- ═══════════════ CABALLOS ═══════════════ -->
@@ -420,6 +425,7 @@ input,select{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,25
  <p>Empieza aquí: crea un caballo, revisa su ración y comparte el plan en segundos.</p>
  <button class="btn-secondary" onclick="showTab('nuevo')">Crear mi primer caballo</button>
  </div>
+ <button class="fab-add" onclick="showTab('nuevo')" aria-label="Agregar caballo">+</button>
 </div>
 
 <!-- ═══════════════ HISTORIAL DE PESO ═══════════════ -->
@@ -569,8 +575,10 @@ input,select{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,25
 
 <!-- ═══════════════ SUPLEMENTOS ═══════════════ -->
 <div id="view-suplementos" class="section hidden">
- <div id="no-sel-supl" class="alert-box alert-warn" style="margin-bottom:12px">
- <span class="alert-icon"></span><span>Selecciona un caballo primero</span>
+ <div id="no-sel-supl" class="empty">
+ <div class="empty-icon">💊</div>
+ <h3>Selecciona un caballo</h3>
+ <p>Ve a Caballos y toca uno para ver o agregar sus suplementos</p>
  </div>
  <div id="supl-content" class="hidden">
  <div class="card">
@@ -2494,7 +2502,7 @@ function exportarPDF() {
 function showTab(tab) {
  ['caballos','racion','condicion','suplementos','peso','alimentos','nuevo'].forEach(t => {
  document.getElementById('view-'+t).classList.toggle('hidden', t !== tab);
- document.getElementById('tab-'+t).classList.toggle('active', t === tab);
+ document.getElementById('tab-'+t)?.classList.toggle('active', t === tab);
  });
  if (tab === 'caballos') { renderHorseList(); renderReminderBanners(); }
  if (tab === 'racion') showRacion();
