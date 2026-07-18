@@ -338,6 +338,7 @@ input,select{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,25
         </div>
       </div>
       <div style="text-align:center;font-size:12px;color:var(--text3)">Recibirás tu código de activación por WhatsApp</div>
+      <div style="text-align:center;margin-top:8px"><a href="#" onclick="showCodigoModal();return false;" style="color:var(--accent2);font-weight:700;font-size:13px;text-decoration:none">¿Ya tienes un código? Ingrésalo aquí</a></div>
     </div>
     <div style="text-align:center;padding:16px 0 8px;font-size:12px;color:var(--text3)">Al continuar aceptas los términos de uso de EquiNutrición</div>
   </div>
@@ -376,12 +377,12 @@ input,select{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,25
 </div>
 
 <!-- MODAL CÓDIGO DE ACTIVACIÓN -->
-<div id="modal-codigo" class="modal-overlay hidden" onclick="closeCodigoModal(event)">
+<div id="modal-codigo" class="modal-overlay hidden" style="z-index:150" onclick="closeCodigoModal(event)">
  <div class="modal" onclick="event.stopPropagation()">
  <div class="modal-title">Código de activación</div>
  <div class="modal-sub">Ingresa el código que recibiste al contratar el plan Premium</div>
  <label>Código</label>
- <input type="text" id="codigo-input" placeholder="Ej: EN-PRE-2026-XXXX" style="text-transform:uppercase;letter-spacing:2px;font-weight:700"/>
+ <input type="text" id="codigo-input" placeholder="Ej: EN-ANU-2026-XXXX" maxlength="16" autocomplete="off" autocapitalize="characters" spellcheck="false" style="text-transform:uppercase;letter-spacing:2px;font-weight:700"/>
  <div id="codigo-error" class="hidden" style="color:var(--danger-text);font-size:13px;margin-top:8px"></div>
  <button class="btn-primary" onclick="validateCodigo()">Activar plan Premium</button>
  <button class="btn-secondary hidden" id="btn-close-codigo" onclick="closeCodigoModal(null)" style="width:100%;margin-top:8px">Cancelar</button>
@@ -1207,7 +1208,7 @@ function updatePlanChip() {
   const expiryText = formatPlanDate(p.expires);
   topbar.innerHTML = `<span class="topbar-plan-pill premium">⭐ Premium</span><span style="color:var(--accent2)">Activo hasta ${expiryText || 'pronto'}</span>`;
  } else {
-  topbar.innerHTML = `<span class="topbar-plan-pill">Gratis</span><span>Mejora tu plan</span><a href="#" onclick="showOnboarding();return false;" style="color:var(--accent2);font-weight:700">Premium</a>`;
+  topbar.innerHTML = `<span class="topbar-plan-pill">Gratis</span><span>Mejora tu plan</span><a href="#" onclick="showOnboarding();return false;" style="color:var(--accent2);font-weight:700">Premium</a><span> · </span><a href="#" onclick="showCodigoModal();return false;" style="color:var(--accent2);font-weight:700">Ya tengo código</a>`;
  }
 }
 
