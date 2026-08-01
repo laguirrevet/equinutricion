@@ -393,6 +393,39 @@ input,select{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,25
  </div>
 </div>
 
+<!-- INSTALACIÓN EN iOS
+     Safari no permite instalar con un botón, así que aquí se explica el
+     camino manual. Es la única vía que existe en iPhone y iPad. -->
+<div id="modal-ios" class="modal-overlay hidden" style="z-index:150" onclick="closeIosModal(event)">
+ <div class="modal" onclick="event.stopPropagation()">
+ <div class="modal-title">Agregar a tu pantalla de inicio</div>
+ <div class="modal-sub">En iPhone se agrega a mano — Safari no permite un botón automático.</div>
+
+ <div id="ios-aviso-safari" class="hidden" style="background:var(--danger-bg,rgba(220,80,60,.12));border:1px solid rgba(220,80,60,.35);border-radius:12px;padding:12px;margin-bottom:14px;font-size:13px;line-height:1.5">
+  <b>Primero abre esta página en Safari.</b><br/>
+  Estás viéndola dentro de otra app, y ahí la opción no aparece. Toca <b>···</b> o el ícono de compartir y elige <b>"Abrir en Safari"</b>.
+ </div>
+
+ <ol style="margin:0 0 14px;padding-left:20px;font-size:14px;line-height:1.9;color:var(--text)">
+  <li>Toca <b>Compartir</b> — el cuadrado con la flecha ↑, abajo al centro de la pantalla</li>
+  <li>Desliza hacia abajo y toca <b>"Agregar a inicio"</b></li>
+  <li>Toca <b>"Agregar"</b>, arriba a la derecha</li>
+  <li>Abre EquiNutrición desde el ícono nuevo de tu pantalla de inicio</li>
+ </ol>
+
+ <div style="font-size:12px;color:var(--text3);line-height:1.6;margin-bottom:14px">
+  Si usas Chrome en vez de Safari, el menú <b>···</b> de arriba a la derecha tiene la misma opción.
+ </div>
+
+ <div id="ios-aviso-codigo" class="hidden" style="background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:12px;margin-bottom:14px;font-size:13px;line-height:1.5">
+  <b>Si tienes un código Premium, actívalo después de instalar.</b><br/>
+  La app instalada guarda sus datos aparte de Safari, así que activarlo antes te gastaría un dispositivo de más.
+ </div>
+
+ <button class="btn-primary" onclick="closeIosModal(null)">Entendido</button>
+ </div>
+</div>
+
 <!-- CONFIRMACIÓN DE PAGO (al volver de Mercado Pago) -->
 <div id="pago-overlay" class="modal-overlay hidden" style="z-index:200">
  <div class="modal" onclick="event.stopPropagation()">
@@ -442,8 +475,8 @@ input,select{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,25
 <!-- ═══════════════ CABALLOS ═══════════════ -->
 <div id="view-caballos" class="section">
  <div id="install-banner" class="install-banner hidden">
- <span>📲 Instala EquiNutrición en tu celular para usarla sin internet</span>
- <button onclick="installPWA()">Instalar</button>
+ <span id="install-texto">📲 Instala EquiNutrición en tu celular para usarla sin internet</span>
+ <button id="install-btn" onclick="installPWA()">Instalar</button>
  </div>
  <div id="reminder-banners"></div>
  <div id="horse-list"></div>
@@ -2560,6 +2593,46 @@ function installPWA() {
  });
 }
 window.addEventListener('appinstalled', () => document.getElementById('install-banner').classList.add('hidden'));
+
+// iOS nunca dispara beforeinstallprompt: Apple no permite instalar con un
+// botón. Sin esto, en iPhone el banner jamás aparece y el usuario no tiene
+// forma de saber que la app se puede agregar al inicio.
+function esIOS() {
+ const ua = navigator.userAgent;
+ // El iPad moderno se declara Macintosh; se distingue porque es táctil
+ return /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+}
+
+function yaEstaInstalada() {
+ return window.navigator.standalone === true ||
+        window.matchMedia('(display-mode: standalone)').matches;
+}
+
+/** Los navegadores incrustados (WhatsApp, Instagram) no ofrecen "Agregar a inicio". */
+function esNavegadorIncrustado() {
+ return /FBAN|FBAV|FB_IAB|Instagram|Line\/|WhatsApp|MicroMessenger/i.test(navigator.userAgent);
+}
+
+function showIosModal() {
+ document.getElementById('ios-aviso-safari').classList.toggle('hidden', !esNavegadorIncrustado());
+ document.getElementById('ios-aviso-codigo').classList.toggle('hidden', isPremium());
+ document.getElementById('modal-ios').classList.remove('hidden');
+}
+
+function closeIosModal(event) {
+ if (event && event.target !== event.currentTarget) return;
+ document.getElementById('modal-ios').classList.add('hidden');
+}
+
+if (esIOS() && !yaEstaInstalada()) {
+ document.getElementById('install-texto').textContent =
+  '📲 Agrega EquiNutrición a tu inicio para usarla sin internet';
+ const btn = document.getElementById('install-btn');
+ btn.textContent = 'Cómo hacerlo';
+ btn.onclick = showIosModal;
+ document.getElementById('install-banner').classList.remove('hidden');
+}
+
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 
 // INIT
