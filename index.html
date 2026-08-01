@@ -211,6 +211,10 @@ input::placeholder{color:var(--text3)}
 .plan-chip{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border2);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:12px}
 .plan-chip.premium{background:var(--accent-bg);border-color:var(--accent);color:var(--accent2)}
 
+/* CONFIRMACIÓN DE PAGO */
+.pago-loader{width:34px;height:34px;margin:22px auto 8px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:pago-giro .8s linear infinite}
+@keyframes pago-giro{to{transform:rotate(360deg)}}
+
 /* TUTORIAL */
 .tutorial-overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:140;display:flex;align-items:center;justify-content:center;padding:18px}
 .tutorial-card{width:100%;max-width:360px;background:linear-gradient(180deg,rgba(24,24,21,.98),rgba(16,16,14,.98));border:1px solid var(--border);border-radius:22px;padding:20px;box-shadow:0 16px 36px rgba(0,0,0,.28)}
@@ -327,17 +331,17 @@ input,select{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,25
         <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:14px">
           <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Mensual</div>
           <div style="font-size:26px;font-weight:800;color:var(--accent2);margin-bottom:10px">$4.000 <span style="font-size:13px;color:var(--text3);font-weight:500">/ mes</span></div>
-          <a href="https://wa.me/56932673835?text=Hola%2C%20quiero%20activar%20EquiNutri%C3%B3n%20Premium%20%E2%80%94%20Plan%20mensual%20%244.000%2Fmes" target="_blank" style="display:block;width:100%;padding:12px;background:var(--surface3);color:var(--text);border:1px solid var(--border2);border-radius:var(--radius);font-size:14px;font-weight:700;text-align:center;text-decoration:none">Contratar plan mensual</a>
+          <button onclick="comprarPlan('mensual', this)" style="display:block;width:100%;padding:12px;background:var(--surface3);color:var(--text);border:1px solid var(--border2);border-radius:var(--radius);font-size:14px;font-weight:700;text-align:center;cursor:pointer">Contratar plan mensual</button>
         </div>
         <div style="background:var(--accent-bg);border:2px solid var(--accent);border-radius:var(--radius);padding:14px;position:relative;margin-top:8px">
           <div style="position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:10px;font-weight:800;padding:3px 14px;border-radius:20px;white-space:nowrap">MEJOR PRECIO</div>
           <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Anual</div>
           <div style="font-size:26px;font-weight:800;color:var(--accent2);margin-bottom:4px">$35.000 <span style="font-size:13px;color:var(--text3);font-weight:500">/ año</span></div>
           <div style="font-size:12px;color:var(--accent-text);margin-bottom:10px">Primer mes gratis — el año comienza a correr desde el segundo mes.</div>
-          <a href="https://wa.me/56932673835?text=Hola%2C%20quiero%20activar%20EquiNutri%C3%B3n%20Premium%20%E2%80%94%20Plan%20anual%20%2435.000%2Fa%C3%B1o%20con%20primer%20mes%20gratis" target="_blank" style="display:block;width:100%;padding:12px;background:var(--accent);color:#fff;border-radius:var(--radius);font-size:14px;font-weight:700;text-align:center;text-decoration:none">Contratar plan anual</a>
+          <button onclick="comprarPlan('anual', this)" style="display:block;width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);font-size:14px;font-weight:700;text-align:center;cursor:pointer">Contratar plan anual</button>
         </div>
       </div>
-      <div style="text-align:center;font-size:12px;color:var(--text3)">Recibirás tu código de activación por WhatsApp</div>
+      <div style="text-align:center;font-size:12px;color:var(--text3)">Pago seguro con Mercado Pago · Tu plan se activa al instante</div>
       <div style="text-align:center;margin-top:8px"><a href="#" onclick="showCodigoModal();return false;" style="color:var(--accent2);font-weight:700;font-size:13px;text-decoration:none">¿Ya tienes un código? Ingrésalo aquí</a></div>
     </div>
     <div style="text-align:center;padding:16px 0 8px;font-size:12px;color:var(--text3)">Al continuar aceptas los términos de uso de EquiNutrición</div>
@@ -382,10 +386,33 @@ input,select{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,25
  <div class="modal-title">Código de activación</div>
  <div class="modal-sub">Ingresa el código que recibiste al contratar el plan Premium</div>
  <label>Código</label>
- <input type="text" id="codigo-input" placeholder="Ej: EN-ANU-2026-XXXX" maxlength="16" autocomplete="off" autocapitalize="characters" spellcheck="false" style="text-transform:uppercase;letter-spacing:2px;font-weight:700"/>
+ <input type="text" id="codigo-input" placeholder="Ej: EN-A26-XXXXXXXX" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false" style="text-transform:uppercase;letter-spacing:2px;font-weight:700"/>
  <div id="codigo-error" class="hidden" style="color:var(--danger-text);font-size:13px;margin-top:8px"></div>
  <button class="btn-primary" onclick="validateCodigo()">Activar plan Premium</button>
  <button class="btn-secondary hidden" id="btn-close-codigo" onclick="closeCodigoModal(null)" style="width:100%;margin-top:8px">Cancelar</button>
+ </div>
+</div>
+
+<!-- CONFIRMACIÓN DE PAGO (al volver de Mercado Pago) -->
+<div id="pago-overlay" class="modal-overlay hidden" style="z-index:200">
+ <div class="modal" onclick="event.stopPropagation()">
+  <div id="pago-spinner">
+   <div class="modal-title">Procesando tu pago</div>
+   <div id="pago-mensaje" class="modal-sub">Confirmando tu pago con Mercado Pago…</div>
+   <div class="pago-loader"></div>
+  </div>
+  <div id="pago-exito" class="hidden">
+   <div style="text-align:center;font-size:44px;line-height:1">⭐</div>
+   <div class="modal-title" style="text-align:center">¡Ya eres Premium!</div>
+   <div id="pago-vigencia" class="modal-sub" style="text-align:center"></div>
+   <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:14px;margin:16px 0;text-align:center">
+    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Tu código de respaldo</div>
+    <div id="pago-codigo" style="font-size:19px;font-weight:800;letter-spacing:2px;color:var(--accent2);word-break:break-all"></div>
+    <button id="btn-copiar-codigo" onclick="copiarCodigoRespaldo()" style="margin-top:10px;padding:8px 18px;background:var(--surface3);color:var(--text);border:1px solid var(--border2);border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer">Copiar código</button>
+   </div>
+   <div style="font-size:12px;color:var(--text3);text-align:center;margin-bottom:14px">Guárdalo. Lo necesitarás solo si reinstalas la app o cambias de teléfono.</div>
+   <button class="btn-primary" onclick="cerrarPagoOverlay()">Comenzar</button>
+  </div>
  </div>
 </div>
 
@@ -832,212 +859,95 @@ function esc(str){
 }
 
 // ═══════════════════════════════════════════════════════
-// SISTEMA DE PLANES Y CÓDIGOS
+// SISTEMA DE PLANES Y LICENCIAS
 // ═══════════════════════════════════════════════════════
 
-// Códigos válidos — puedes agregar más aquí
-const VALID_CODES = {
-  'EN-ANU-2026-ZVOG': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-A0FD': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-D0AK': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-0NNC': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-B3E6': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-3V3Y': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-H7B8': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-72BV': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-PD7B': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-N7Q5': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-D6RY': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-92WX': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-UUAT': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-ZO39': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-VNQU': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-0S1H': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-OJF1': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-SWYJ': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-IR6H': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-WQQ7': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-PRZD': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-MVU3': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-IVPK': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-34N7': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-CGE6': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-P6WV': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-CLJ0': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-IKBI': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-WOPY': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-8F5J': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-E9P9': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-J1LS': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-W65H': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-6HEG': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-HAOB': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-P1JE': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-J2I6': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-3UDG': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-J1JE': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-4191': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-GI39': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-3XQJ': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-90G5': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-34NC': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-6IMX': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-6MIK': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-RHIQ': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-MPLC': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-CJMU': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-8LVN': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-CHJD': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-2GO7': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-Q6LO': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-TVGV': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-8SD5': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-W0IF': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-MPYZ': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-VVSX': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-JJ4Q': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-B5AG': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-5RQ0': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-8MXX': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-R9HK': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-JJOT': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-WHCW': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-WNDN': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-ZA9A': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-G1PB': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-DX9T': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-H7ZU': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-G257': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-50LZ': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-EKSD': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-N6WN': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-38WI': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-BIT8': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-HSOO': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-LZ82': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-UO04': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-D711': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-I17C': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-VVPJ': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-RYIQ': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-R8VP': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-08XU': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-D11C': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-ODFM': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-7RHF': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-DNYV': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-64JQ': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-YIK4': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-AF9W': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-PMXS': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-TH2S': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-E4H1': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-YFOK': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-379G': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-QFLD': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-NMHK': {plan:'premium', durationDays:365},
-  'EN-ANU-2026-W0LH': {plan:'premium', durationDays:365},
-  'EN-MES-2026-OTAB': {plan:'premium', durationDays:30},
-  'EN-MES-2026-89F3': {plan:'premium', durationDays:30},
-  'EN-MES-2026-UCDR': {plan:'premium', durationDays:30},
-  'EN-MES-2026-T98O': {plan:'premium', durationDays:30},
-  'EN-MES-2026-0SIA': {plan:'premium', durationDays:30},
-  'EN-MES-2026-JSAJ': {plan:'premium', durationDays:30},
-  'EN-MES-2026-6P2M': {plan:'premium', durationDays:30},
-  'EN-MES-2026-3V39': {plan:'premium', durationDays:30},
-  'EN-MES-2026-G5EV': {plan:'premium', durationDays:30},
-  'EN-MES-2026-TB8C': {plan:'premium', durationDays:30},
-  'EN-MES-2026-1PMH': {plan:'premium', durationDays:30},
-  'EN-MES-2026-11Z8': {plan:'premium', durationDays:30},
-  'EN-MES-2026-8XH7': {plan:'premium', durationDays:30},
-  'EN-MES-2026-UKM1': {plan:'premium', durationDays:30},
-  'EN-MES-2026-LMN2': {plan:'premium', durationDays:30},
-  'EN-MES-2026-CUHL': {plan:'premium', durationDays:30},
-  'EN-MES-2026-NWX5': {plan:'premium', durationDays:30},
-  'EN-MES-2026-7RQG': {plan:'premium', durationDays:30},
-  'EN-MES-2026-J7RG': {plan:'premium', durationDays:30},
-  'EN-MES-2026-K4BP': {plan:'premium', durationDays:30},
-  'EN-MES-2026-9NP7': {plan:'premium', durationDays:30},
-  'EN-MES-2026-I7BT': {plan:'premium', durationDays:30},
-  'EN-MES-2026-RHFF': {plan:'premium', durationDays:30},
-  'EN-MES-2026-BYPG': {plan:'premium', durationDays:30},
-  'EN-MES-2026-7CWW': {plan:'premium', durationDays:30},
-  'EN-MES-2026-JW5F': {plan:'premium', durationDays:30},
-  'EN-MES-2026-L494': {plan:'premium', durationDays:30},
-  'EN-MES-2026-HMM0': {plan:'premium', durationDays:30},
-  'EN-MES-2026-NJ51': {plan:'premium', durationDays:30},
-  'EN-MES-2026-3UQE': {plan:'premium', durationDays:30},
-  'EN-MES-2026-BMF6': {plan:'premium', durationDays:30},
-  'EN-MES-2026-EODO': {plan:'premium', durationDays:30},
-  'EN-MES-2026-HXPA': {plan:'premium', durationDays:30},
-  'EN-MES-2026-8ZIW': {plan:'premium', durationDays:30},
-  'EN-MES-2026-904B': {plan:'premium', durationDays:30},
-  'EN-MES-2026-4X9K': {plan:'premium', durationDays:30},
-  'EN-MES-2026-ILG2': {plan:'premium', durationDays:30},
-  'EN-MES-2026-W4BZ': {plan:'premium', durationDays:30},
-  'EN-MES-2026-856M': {plan:'premium', durationDays:30},
-  'EN-MES-2026-7J4Q': {plan:'premium', durationDays:30},
-  'EN-MES-2026-7AIR': {plan:'premium', durationDays:30},
-  'EN-MES-2026-DKMQ': {plan:'premium', durationDays:30},
-  'EN-MES-2026-40ND': {plan:'premium', durationDays:30},
-  'EN-MES-2026-I8TQ': {plan:'premium', durationDays:30},
-  'EN-MES-2026-HSER': {plan:'premium', durationDays:30},
-  'EN-MES-2026-C64V': {plan:'premium', durationDays:30},
-  'EN-MES-2026-20C0': {plan:'premium', durationDays:30},
-  'EN-MES-2026-CGHL': {plan:'premium', durationDays:30},
-  'EN-MES-2026-Y6EW': {plan:'premium', durationDays:30},
-  'EN-MES-2026-5YRR': {plan:'premium', durationDays:30},
-  'EN-MES-2026-TJPT': {plan:'premium', durationDays:30},
-  'EN-MES-2026-BIT7': {plan:'premium', durationDays:30},
-  'EN-MES-2026-1XLI': {plan:'premium', durationDays:30},
-  'EN-MES-2026-DUPO': {plan:'premium', durationDays:30},
-  'EN-MES-2026-XUF8': {plan:'premium', durationDays:30},
-  'EN-MES-2026-BDBV': {plan:'premium', durationDays:30},
-  'EN-MES-2026-ALKQ': {plan:'premium', durationDays:30},
-  'EN-MES-2026-KP0Y': {plan:'premium', durationDays:30},
-  'EN-MES-2026-Z66W': {plan:'premium', durationDays:30},
-  'EN-MES-2026-FCB3': {plan:'premium', durationDays:30},
-  'EN-MES-2026-IX8L': {plan:'premium', durationDays:30},
-  'EN-MES-2026-5VET': {plan:'premium', durationDays:30},
-  'EN-MES-2026-FIXW': {plan:'premium', durationDays:30},
-  'EN-MES-2026-OMZ2': {plan:'premium', durationDays:30},
-  'EN-MES-2026-BOEF': {plan:'premium', durationDays:30},
-  'EN-MES-2026-N8MS': {plan:'premium', durationDays:30},
-  'EN-MES-2026-V3LP': {plan:'premium', durationDays:30},
-  'EN-MES-2026-TNIQ': {plan:'premium', durationDays:30},
-  'EN-MES-2026-VYTO': {plan:'premium', durationDays:30},
-  'EN-MES-2026-T9Y6': {plan:'premium', durationDays:30},
-  'EN-MES-2026-TOEO': {plan:'premium', durationDays:30},
-  'EN-MES-2026-ZI3Q': {plan:'premium', durationDays:30},
-  'EN-MES-2026-TV2K': {plan:'premium', durationDays:30},
-  'EN-MES-2026-6N8I': {plan:'premium', durationDays:30},
-  'EN-MES-2026-M0P7': {plan:'premium', durationDays:30},
-  'EN-MES-2026-4H05': {plan:'premium', durationDays:30},
-  'EN-MES-2026-EY97': {plan:'premium', durationDays:30},
-  'EN-MES-2026-J19U': {plan:'premium', durationDays:30},
-  'EN-MES-2026-7WD5': {plan:'premium', durationDays:30},
-  'EN-MES-2026-21QV': {plan:'premium', durationDays:30},
-  'EN-MES-2026-XEWB': {plan:'premium', durationDays:30},
-  'EN-MES-2026-SP9L': {plan:'premium', durationDays:30},
-  'EN-MES-2026-7AJM': {plan:'premium', durationDays:30},
-  'EN-MES-2026-ITIX': {plan:'premium', durationDays:30},
-  'EN-MES-2026-OD45': {plan:'premium', durationDays:30},
-  'EN-MES-2026-LLFW': {plan:'premium', durationDays:30},
-  'EN-MES-2026-1UDS': {plan:'premium', durationDays:30},
-  'EN-MES-2026-RCYA': {plan:'premium', durationDays:30},
-  'EN-MES-2026-23LL': {plan:'premium', durationDays:30},
-  'EN-MES-2026-L4O0': {plan:'premium', durationDays:30},
-  'EN-MES-2026-81OU': {plan:'premium', durationDays:30},
-  'EN-MES-2026-OJB7': {plan:'premium', durationDays:30},
-  'EN-MES-2026-M0SO': {plan:'premium', durationDays:30},
-  'EN-MES-2026-MSIU': {plan:'premium', durationDays:30},
-  'EN-MES-2026-U3CX': {plan:'premium', durationDays:30},
-  'EN-MES-2026-04IR': {plan:'premium', durationDays:30},
-  'EN-MES-2026-7J2U': {plan:'premium', durationDays:30},
-  'EN-MES-2026-108G': {plan:'premium', durationDays:30},
-  'EN-MES-2026-M7LY': {plan:'premium', durationDays:30},
-  'EN-MES-2026-DP2G': {plan:'premium', durationDays:30}
+// URL del Worker que cobra y emite las licencias.
+// Se completa después de desplegar (ver worker/README.md).
+const API_BASE = 'https://equinutricion-api.equinutricion.workers.dev';
+
+// Clave pública para verificar las licencias SIN conexión.
+// Es pública a propósito: solo sirve para verificar firmas, jamás para crearlas.
+// La privada vive únicamente como secreto del Worker.
+const LICENSE_PUBLIC_KEY = {
+ kty: 'EC',
+ crv: 'P-256',
+ x: 'ERMwIXH44zkeUYWszIUrXtrwbjLSR1EhEfxfMZ6zkH4',
+ y: '-4zl5oR8kE4sxJ1Zuhmdu4IbQIK_dRbur2Ou6LDK-nc'
 };
+
+// Resultado de verificar el token, cacheado para que isPremium() siga siendo
+// síncrona (se llama dentro de los renders).
+let licenseState = null;
+
+function getDeviceId() {
+ let id = localStorage.getItem('en_device');
+ if (!id) {
+  id = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(36).slice(2));
+  localStorage.setItem('en_device', id);
+ }
+ return id;
+}
+
+function b64urlToBytes(str) {
+ const padded = str.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((str.length + 3) % 4);
+ const bin = atob(padded);
+ const bytes = new Uint8Array(bin.length);
+ for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+ return bytes;
+}
+
+/**
+ * Verifica el token guardado contra la clave pública. Se llama una vez al
+ * arrancar; el resultado queda en licenseState.
+ */
+async function verifyLicense() {
+ licenseState = null;
+ const token = localStorage.getItem('en_license');
+ if (!token || token.indexOf('.') === -1) return null;
+
+ try {
+  const [payloadB64, signatureB64] = token.split('.');
+  const key = await crypto.subtle.importKey(
+   'jwk', LICENSE_PUBLIC_KEY, {name:'ECDSA', namedCurve:'P-256'}, false, ['verify']
+  );
+  const ok = await crypto.subtle.verify(
+   {name:'ECDSA', hash:'SHA-256'},
+   key,
+   b64urlToBytes(signatureB64),
+   new TextEncoder().encode(payloadB64)
+  );
+  if (!ok) { localStorage.removeItem('en_license'); return null; }
+
+  const payload = JSON.parse(new TextDecoder().decode(b64urlToBytes(payloadB64)));
+
+  // El token está atado a este dispositivo: copiarlo a otro teléfono no sirve
+  if (payload.d !== getDeviceId()) return null;
+
+  const expires = payload.exp * 1000;
+  if (expires < Date.now()) return null;
+
+  licenseState = {expires, code: payload.c};
+  return licenseState;
+ } catch {
+  return null;
+ }
+}
+
+async function storeLicense(token) {
+ localStorage.setItem('en_license', token);
+ return await verifyLicense();
+}
+
+async function apiPost(path, body) {
+ const response = await fetch(API_BASE + path, {
+  method: 'POST',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify(body)
+ });
+ const data = await response.json().catch(() => ({}));
+ return {ok: response.ok, status: response.status, data};
+}
 
 const PLAN_LIMITS = {free:1, premium:Infinity};
 
@@ -1058,7 +968,11 @@ function normalizePlan(rawPlan) {
  return {type, expires, code};
 }
 
-function getPlan() {
+/**
+ * Plan guardado con el sistema antiguo (antes de las licencias firmadas).
+ * Se mantiene para que quien ya activó Premium no lo pierda al actualizar.
+ */
+function getLegacyPlan() {
  const p = localStorage.getItem('en_plan');
  if (!p) return {type:'free', expires:null, code:null};
  try {
@@ -1078,6 +992,14 @@ function getPlan() {
  }
 }
 
+/** La licencia firmada manda; si no hay, se respeta el plan antiguo. */
+function getPlan() {
+ if (licenseState && licenseState.expires > Date.now()) {
+  return {type:'premium', expires:new Date(licenseState.expires).toISOString(), code:licenseState.code};
+ }
+ return getLegacyPlan();
+}
+
 function setPlan(type, expires, code) {
  const planType = type === 'premium' ? 'premium' : 'free';
  let normalizedExpires = null;
@@ -1094,9 +1016,12 @@ function setPlan(type, expires, code) {
 }
 
 function isPremium() {
- const p = getPlan();
- if (p.type !== 'premium') return false;
- if (!p.expires) return false;
+ // Licencia firmada, verificada al arrancar contra la clave pública
+ if (licenseState && licenseState.expires > Date.now()) return true;
+
+ // Plan del sistema antiguo, aún vigente
+ const p = getLegacyPlan();
+ if (p.type !== 'premium' || !p.expires) return false;
  const expiresDate = new Date(p.expires);
  if (Number.isNaN(expiresDate.getTime())) {
   localStorage.removeItem('en_plan');
@@ -1176,21 +1101,126 @@ function closeCodigoModal(e) {
  document.getElementById('modal-codigo').classList.add('hidden');
 }
 
-function validateCodigo() {
+const CODIGO_ERRORES = {
+ invalid: 'Código inválido. Revísalo o escríbenos por WhatsApp.',
+ expired: 'Este código ya venció. Puedes renovar tu plan desde la app.',
+ device_limit: 'Este código ya se usó en 3 dispositivos. Escríbenos por WhatsApp.',
+ rate_limit: 'Demasiados intentos. Espera unos minutos y vuelve a probar.'
+};
+
+async function validateCodigo() {
  const raw = document.getElementById('codigo-input').value.trim().toUpperCase();
  const errEl = document.getElementById('codigo-error');
- if (!raw) { errEl.textContent = 'Ingresa un código'; errEl.classList.remove('hidden'); return; }
- const entry = VALID_CODES[raw];
- if (!entry) { errEl.textContent = 'Código inválido. Verifica el código o contacta por WhatsApp.'; errEl.classList.remove('hidden'); return; }
- const activatedAt = new Date();
- const expiresAt = new Date(activatedAt);
- expiresAt.setDate(activatedAt.getDate() + entry.durationDays);
- setPlan('premium', expiresAt.toISOString(), raw);
- document.getElementById('modal-codigo').classList.add('hidden');
- hideOnboarding();
- updatePlanChip();
- renderHorseList();
- alert('Plan Premium activado. Bienvenido a EquiNutrición Premium.');
+ const btn = document.querySelector('#modal-codigo .btn-primary');
+ const showError = msg => { errEl.textContent = msg; errEl.classList.remove('hidden'); };
+
+ if (!raw) { showError('Ingresa un código'); return; }
+
+ errEl.classList.add('hidden');
+ btn.disabled = true;
+ btn.textContent = 'Verificando…';
+
+ try {
+  const {ok, data} = await apiPost('/api/activate', {code: raw, deviceId: getDeviceId()});
+  if (!ok || !data.token) {
+   showError(CODIGO_ERRORES[data.error] || CODIGO_ERRORES.invalid);
+   return;
+  }
+  await storeLicense(data.token);
+  document.getElementById('modal-codigo').classList.add('hidden');
+  hideOnboarding();
+  updatePlanChip();
+  renderHorseList();
+  alert('Plan Premium activado. Bienvenido a EquiNutrición Premium.');
+ } catch {
+  showError('Sin conexión. Revisa tu internet e inténtalo de nuevo.');
+ } finally {
+  btn.disabled = false;
+  btn.textContent = 'Activar plan Premium';
+ }
+}
+
+// ═══════════════════════════════════════════════════════
+// PAGO CON MERCADO PAGO
+// ═══════════════════════════════════════════════════════
+
+/** Pide la preferencia al Worker y manda al usuario a pagar. */
+async function comprarPlan(plan, btn) {
+ const textoOriginal = btn.textContent;
+ btn.disabled = true;
+ btn.textContent = 'Abriendo el pago…';
+ try {
+  const {ok, data} = await apiPost('/api/checkout', {plan});
+  if (!ok || !data.initPoint) throw new Error('sin link de pago');
+  // Guardado por si el sistema pierde el contexto al volver del navegador
+  localStorage.setItem('en_last_order', data.orderId);
+  location.href = data.initPoint;
+ } catch {
+  btn.disabled = false;
+  btn.textContent = textoOriginal;
+  alert('No pudimos abrir el pago. Revisa tu conexión o escríbenos por WhatsApp.');
+ }
+}
+
+/**
+ * Al volver de Mercado Pago la app trae ?order=... en la URL.
+ * El webhook puede tardar unos segundos, así que se reintenta.
+ */
+async function reclamarCompra(orderId) {
+ const overlay = document.getElementById('pago-overlay');
+ const mensaje = document.getElementById('pago-mensaje');
+ overlay.classList.remove('hidden');
+
+ const deviceId = getDeviceId();
+ const limite = Date.now() + 45000;
+
+ while (Date.now() < limite) {
+  try {
+   const {data} = await apiPost('/api/claim', {orderId, deviceId});
+   if (data.status === 'ok' && data.token) {
+    await storeLicense(data.token);
+    localStorage.removeItem('en_last_order');
+    hideOnboarding();
+    updatePlanChip();
+    renderHorseList();
+    mostrarCodigoRespaldo(data.code, data.expiresAt);
+    return;
+   }
+   if (data.status === 'desconocida') break;
+  } catch {
+   // Sin conexión momentánea: se reintenta igual
+  }
+  mensaje.textContent = 'Confirmando tu pago con Mercado Pago…';
+  await new Promise(r => setTimeout(r, 2500));
+ }
+
+ overlay.classList.add('hidden');
+ alert('Tu pago puede tardar unos minutos en confirmarse. Vuelve a abrir la app en un rato, o escríbenos por WhatsApp si el problema sigue.');
+}
+
+/** El código es el respaldo para reinstalar o cambiar de teléfono. */
+function mostrarCodigoRespaldo(code, expiresAt) {
+ document.getElementById('pago-mensaje').textContent = '';
+ document.getElementById('pago-spinner').classList.add('hidden');
+ document.getElementById('pago-exito').classList.remove('hidden');
+ document.getElementById('pago-codigo').textContent = code;
+ const hasta = formatPlanDate(expiresAt);
+ document.getElementById('pago-vigencia').textContent = hasta ? `Tu plan Premium está activo hasta el ${hasta}.` : '';
+}
+
+function copiarCodigoRespaldo() {
+ const code = document.getElementById('pago-codigo').textContent;
+ const btn = document.getElementById('btn-copiar-codigo');
+ navigator.clipboard.writeText(code).then(() => {
+  btn.textContent = '✓ Copiado';
+  setTimeout(() => { btn.textContent = 'Copiar código'; }, 2000);
+ }).catch(() => {
+  btn.textContent = 'Anótalo a mano';
+ });
+}
+
+function cerrarPagoOverlay() {
+ document.getElementById('pago-overlay').classList.add('hidden');
 }
 
 function formatPlanDate(value) {
@@ -2533,18 +2563,41 @@ window.addEventListener('appinstalled', () => document.getElementById('install-b
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 
 // INIT
-updateFoodSelects();
-renderHorseList();
-renderReminderBanners();
-document.getElementById('topbar-logo-img').src = APP_ICON;
-document.getElementById('ob-logo').src = APP_ICON;
-updatePlanChip();
-// Mostrar onboarding si es primera vez
-if (!localStorage.getItem('en_onboarded')) {
- showOnboarding();
-} else {
- showTutorial();
-}
+(async function init() {
+ // La licencia se verifica antes del primer render para que isPremium() ya
+ // tenga la respuesta. Funciona sin conexión: solo usa la clave pública.
+ await verifyLicense();
+
+ updateFoodSelects();
+ renderHorseList();
+ renderReminderBanners();
+ document.getElementById('topbar-logo-img').src = APP_ICON;
+ document.getElementById('ob-logo').src = APP_ICON;
+ updatePlanChip();
+
+ // ¿Volvemos de pagar en Mercado Pago?
+ // El parámetro en la URL siempre se reclama, incluso si ya es Premium:
+ // puede ser una renovación. El guardado en localStorage es la red de
+ // seguridad para cuando el sistema pierde el contexto al volver.
+ const ordenUrl = new URLSearchParams(location.search).get('order');
+ const ordenGuardada = localStorage.getItem('en_last_order');
+ const orderId = ordenUrl || (isPremium() ? null : ordenGuardada);
+
+ if (ordenUrl) history.replaceState(null, '', location.pathname);
+
+ if (orderId) {
+  await reclamarCompra(orderId);
+  return;
+ }
+ if (ordenGuardada) localStorage.removeItem('en_last_order');
+
+ // Mostrar onboarding si es primera vez
+ if (!localStorage.getItem('en_onboarded')) {
+  showOnboarding();
+ } else {
+  showTutorial();
+ }
+})();
 </script>
 </body>
 </html>

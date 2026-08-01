@@ -1,0 +1,7 @@
+node_modules/
+.wrangler/
+.dev.vars
+
+# Códigos antiguos: no vuelven a subirse al repositorio público
+scripts/legacy-codes.json
+scripts/legacy-codes.kv.json

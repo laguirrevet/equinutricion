@@ -1,4 +1,4 @@
-const CACHE = 'equinutricion-v4';
+const CACHE = 'equinutricion-v5';
 const ASSETS = [
   '/equinutricion/',
   '/equinutricion/index.html',

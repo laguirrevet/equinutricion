@@ -1,0 +1,26 @@
+name = "equinutricion-api"
+main = "src/index.js"
+compatibility_date = "2026-01-15"
+
+[vars]
+# Origen de la app — desde dónde se aceptan llamadas (CORS).
+# Separar con comas si agregas un dominio propio más adelante.
+ALLOWED_ORIGINS = "https://laguirrevet.github.io"
+
+# URL a la que Mercado Pago devuelve al usuario después de pagar.
+APP_URL = "https://laguirrevet.github.io/equinutricion/"
+
+# URL pública de este Worker. Se completa después del primer deploy,
+# cuando Cloudflare te asigne el subdominio.
+API_URL = "https://equinutricion-api.equinutricion.workers.dev"
+
+# Almacén de licencias y órdenes.
+# El id lo entrega: wrangler kv namespace create LICENSES
+[[kv_namespaces]]
+binding = "LICENSES"
+id = "2e97f268ed80478291ad60e5265ca85d"
+
+# Los secretos NO van en este archivo. Se cargan con:
+#   wrangler secret put MP_ACCESS_TOKEN
+#   wrangler secret put MP_WEBHOOK_SECRET
+#   wrangler secret put SIGNING_PRIVATE_KEY

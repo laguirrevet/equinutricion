@@ -1,0 +1,14 @@
+# Dependencias
+node_modules/
+
+# Secretos — nunca al repositorio
+.secrets/
+.dev.vars
+*.private.json
+
+# Cloudflare
+.wrangler/
+
+# Sistema
+.DS_Store
+Thumbs.db

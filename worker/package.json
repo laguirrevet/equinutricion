@@ -1,0 +1,21 @@
+{
+  "name": "equinutricion-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "API de licencias Premium de EquiNutrición — Mercado Pago + Cloudflare Workers",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail",
+    "keys": "node scripts/generate-keys.mjs",
+    "seed": "node scripts/seed-legacy-codes.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "workerd@1.20260730.1": true
+  }
+}
