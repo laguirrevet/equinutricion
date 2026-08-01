@@ -268,6 +268,10 @@ async function issueLicense(env, { orderId, paymentId, planKey }) {
     { expirationTtl: ORDER_TTL }
   );
 
+  // Se registra aquí, y no en quien llama, para que toda licencia deje rastro
+  // sin importar por qué camino se emitió.
+  console.log(`Licencia ${code} emitida — orden ${orderId}, pago ${paymentId}, plan ${planKey}`);
+
   return code;
 }
 
@@ -406,8 +410,7 @@ async function handleWebhook(request, env) {
     return new Response('ok', { status: 200 });
   }
 
-  const code = await issueLicense(env, { orderId, paymentId: String(payment.id), planKey });
-  console.log(`Licencia ${code} emitida para la orden ${orderId}`);
+  await issueLicense(env, { orderId, paymentId: String(payment.id), planKey });
 
   return new Response('ok', { status: 200 });
 }
@@ -430,6 +433,9 @@ async function handleClaim(request, env) {
       );
       const approved = (search.results || []).find(p => p.status === 'approved');
       if (approved) {
+        // Si se llega hasta aquí, el webhook no hizo su trabajo. Vale la pena
+        // saberlo: significa que quien pague y no vuelva a la app se queda sin licencia.
+        console.warn(`Orden ${orderId} rescatada por /api/claim — el webhook no la emitió`);
         await issueLicense(env, { orderId, paymentId: String(approved.id), planKey: order.plan });
         order = JSON.parse((await env.LICENSES.get(`order:${orderId}`)) || 'null');
       }

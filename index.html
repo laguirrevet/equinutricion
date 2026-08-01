@@ -2591,6 +2591,14 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
  }
  if (ordenGuardada) localStorage.removeItem('en_last_order');
 
+ // Entrada directa desde el landing: ?planes=1 abre la pantalla de planes
+ // aunque el usuario ya haya pasado por el onboarding alguna vez.
+ if (new URLSearchParams(location.search).get('planes')) {
+  history.replaceState(null, '', location.pathname);
+  showOnboarding();
+  return;
+ }
+
  // Mostrar onboarding si es primera vez
  if (!localStorage.getItem('en_onboarded')) {
   showOnboarding();
