@@ -2,6 +2,12 @@ name = "equinutricion-api"
 main = "src/index.js"
 compatibility_date = "2026-01-15"
 
+# Guarda los console.log del Worker para poder revisar después por qué
+# camino se emitió cada licencia (webhook o rescate de /api/claim).
+[observability]
+enabled = true
+head_sampling_rate = 1
+
 [vars]
 # Origen de la app — desde dónde se aceptan llamadas (CORS).
 # Separar con comas si agregas un dominio propio más adelante.

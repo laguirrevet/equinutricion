@@ -177,6 +177,30 @@ input::placeholder{color:var(--text3)}
 /* DIVIDER */
 .divider{height:1px;background:var(--border);margin:16px 0}
 .success-msg{color:var(--ok-text);font-size:13px;margin-top:10px;font-weight:600;text-align:center}
+.error-msg{color:#E24B4A;font-size:13px;margin-top:10px;font-weight:600;text-align:center}
+
+/* VEREDICTO — la respuesta a "¿está bien mi caballo?", antes que cualquier número */
+.veredicto{border-radius:18px;padding:18px 18px 16px;margin-bottom:12px;border:1px solid;display:flex;gap:14px;align-items:flex-start}
+.veredicto .vico{font-size:26px;line-height:1.1;flex-shrink:0}
+.veredicto .vtit{font-size:17px;font-weight:800;line-height:1.3;margin-bottom:5px}
+.veredicto .vsub{font-size:13.5px;line-height:1.55;opacity:.92}
+.veredicto .vacc{font-size:13.5px;line-height:1.55;margin-top:8px;font-weight:700}
+.veredicto.v-ok{background:rgba(29,158,117,.12);border-color:rgba(29,158,117,.30);color:var(--ok-text)}
+.veredicto.v-atencion{background:rgba(240,184,74,.11);border-color:rgba(240,184,74,.30);color:#f0c97a}
+.veredicto.v-problema{background:rgba(226,75,74,.11);border-color:rgba(226,75,74,.32);color:#f0908f}
+/* Línea de crecimiento: va con el veredicto, no en una tarjeta aparte */
+.vcrec{font-size:12.5px;line-height:1.5;margin-top:9px;padding-top:9px;border-top:1px solid currentColor;opacity:.72}
+
+/* DETALLE PLEGABLE */
+.detalle{background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.02));border:1px solid var(--border);border-radius:18px;margin-bottom:12px;overflow:hidden}
+.detalle>summary{padding:15px 16px;font-size:14px;font-weight:700;color:var(--text2);cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px}
+.detalle>summary::-webkit-details-marker{display:none}
+.detalle>summary::before{content:'▸';font-size:12px;transition:transform .18s ease;display:inline-block}
+.detalle[open]>summary::before{transform:rotate(90deg)}
+.detalle>summary:hover{color:var(--text)}
+.detalle-cuerpo{padding:0 16px 16px}
+/* Advertencia clínica de un alimento (Ca:P invertido, ficha inconsistente, etc.) */
+.food-nota{font-size:11.5px;line-height:1.45;color:#f0c97a;background:rgba(240,184,74,.10);border-left:3px solid #f0b84a;border-radius:0 8px 8px 0;padding:7px 9px;margin-top:7px}
 
 /* INSTALL BANNER */
 .install-banner{background:linear-gradient(135deg,rgba(10,46,32,.95),rgba(29,158,117,.16));border:1px solid rgba(29,158,117,.28);border-radius:16px;padding:12px 14px;margin-bottom:12px;font-size:13px;color:var(--accent-text);display:flex;justify-content:space-between;align-items:center;gap:10px;box-shadow:0 10px 24px rgba(0,0,0,.16)}
@@ -466,8 +490,8 @@ input,select{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,25
 <div class="tab-bar">
  <button class="tab active" onclick="showTab('caballos')" id="tab-caballos">Caballos</button>
  <button class="tab" onclick="showTab('racion')" id="tab-racion">Ración</button>
- <button class="tab" onclick="showTab('condicion')" id="tab-condicion">C. Corporal</button>
- <button class="tab" onclick="showTab('suplementos')" id="tab-suplementos">Supl.</button>
+ <button class="tab" onclick="showTab('condicion')" id="tab-condicion">Condición</button>
+ <button class="tab" onclick="showTab('suplementos')" id="tab-suplementos">Suplementos</button>
  <button class="tab" onclick="showTab('peso')" id="tab-peso">⚖️ Peso</button>
  <button class="tab" onclick="showTab('alimentos')" id="tab-alimentos">Alimentos</button>
 </div>
@@ -486,6 +510,29 @@ input,select{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,25
  <p>Empieza aquí: crea un caballo, revisa su ración y comparte el plan en segundos.</p>
  <button class="btn-secondary" onclick="showTab('nuevo')">Crear mi primer caballo</button>
  </div>
+ <!-- Respaldo. Todo vive en este teléfono: si se pierde, se pierde el historial completo.
+      Un archivo evita eso sin necesidad de cuentas ni servidor. -->
+ <details class="detalle" id="respaldo-box" style="margin-top:14px">
+ <summary>Respaldo de tus datos</summary>
+ <div class="detalle-cuerpo">
+ <p style="font-size:13px;color:var(--text2);line-height:1.55;margin:0 0 14px">
+ Tus caballos, pesajes, condición corporal, suplementos y alimentos propios se guardan
+ <strong>solo en este teléfono</strong>. Descarga un archivo de respaldo de vez en cuando:
+ si cambias de equipo o reinstalas la app, lo recuperas todo.
+ </p>
+ <div style="display:flex;gap:10px;flex-wrap:wrap">
+ <button class="btn-secondary" onclick="descargarRespaldo()" style="flex:1;min-width:150px;padding:12px">Descargar respaldo</button>
+ <button class="btn-secondary" onclick="document.getElementById('restore-file').click()" style="flex:1;min-width:150px;padding:12px">Restaurar respaldo</button>
+ </div>
+ <input type="file" id="restore-file" accept="application/json,.json" style="display:none" onchange="restaurarRespaldo(event)"/>
+ <p id="respaldo-msg" class="success-msg hidden"></p>
+ <p id="respaldo-err" class="error-msg hidden"></p>
+ <p style="font-size:11.5px;color:var(--text3);line-height:1.5;margin:12px 0 0">
+ El archivo no incluye tu código Premium — ese va aparte y no se comparte.
+ </p>
+ </div>
+ </details>
+
  <button class="fab-add" onclick="showTab('nuevo')" aria-label="Agregar caballo">+</button>
 </div>
 
@@ -567,20 +614,28 @@ input,select{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,25
  <p>Crea o selecciona un caballo para ver el plan diario y empezar a trabajar con claridad.</p>
  </div>
  <div id="racion-content" class="hidden">
+ <!-- Lo primero y lo único que el dueño necesita leer: si su caballo está bien, y si no
+      lo está, qué hacer. Una sola cosa a la vez. Todo lo demás se pliega más abajo. -->
+ <div id="veredicto"></div>
  <div class="card">
  <div class="card-title">Plan de alimentación</div>
  <div id="meal-plan"></div>
  </div>
- <div class="card">
+
+ <!-- Detalle técnico. Plegado por defecto: está para Luis en terreno y para el PDF que
+      se le manda al cliente, no para la pantalla de todos los días. -->
+ <details class="detalle">
+ <summary>Ver detalle</summary>
+ <div class="detalle-cuerpo">
  <div class="card-title">Ingredientes y cobertura</div>
  <div id="ingredient-detail"></div>
- </div>
- <div class="card">
- <div class="card-title">Requerimientos diarios</div>
+ <div class="card-title" style="margin-top:18px">Requerimientos diarios</div>
  <div class="metric-grid" id="metrics-grid"></div>
  <div class="card-title" style="margin-top:14px">Proteína y minerales</div>
  <div class="nutrient-grid" id="nutrient-grid"></div>
  </div>
+ </details>
+
  <div class="card">
  <div class="card-title">Exportar plan de ración</div>
  <p style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5">Genera el plan diario para compartir con el cuidador por WhatsApp o imprimir.</p>
@@ -692,12 +747,21 @@ input,select{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,25
  <div class="card-title">Agregar alimento personalizado</div>
  <label>Nombre</label>
  <input type="text" id="cf-nombre" maxlength="60" placeholder="Ej: Heno de avena"/>
+ <p style="font-size:12px;color:var(--muted);margin:-4px 0 10px">Copia los números del análisis garantizado del saco. Si alguno no viene impreso, déjalo en blanco: la app prefiere avisar que le falta el dato antes que inventarlo.</p>
  <div class="row2">
- <div><label>ED (Mcal/kg MS)</label><input type="number" id="cf-ed" placeholder="2.4" step="0.01" min="0"/></div>
- <div><label>Almidón (% MS)</label><input type="number" id="cf-starch" placeholder="5" step="0.1" min="0" max="100"/></div>
+ <div><label>Energía (Mcal/kg del saco)</label><input type="number" id="cf-ed" placeholder="2.4" step="0.01" min="0"/></div>
+ <div><label>Proteína (% del saco)</label><input type="number" id="cf-cp" placeholder="12" step="0.1" min="0" max="100"/></div>
  </div>
  <div class="row2">
+ <div><label>Almidón (%) <span style="color:var(--muted)">— opcional</span></label><input type="number" id="cf-starch" placeholder="5" step="0.1" min="0" max="100"/></div>
  <div><label>Materia seca (%)</label><input type="number" id="cf-ms" placeholder="88" step="0.1" min="1" max="100"/></div>
+ </div>
+ <div class="row2">
+ <div><label>Calcio (%) <span style="color:var(--muted)">— opcional</span></label><input type="number" id="cf-ca" placeholder="0.8" step="0.01" min="0" max="40"/></div>
+ <div><label>Fósforo (%) <span style="color:var(--muted)">— opcional</span></label><input type="number" id="cf-p" placeholder="0.5" step="0.01" min="0" max="40"/></div>
+ </div>
+ <div class="row2">
+ <div><label>Lisina (%) <span style="color:var(--muted)">— opcional</span></label><input type="number" id="cf-lys" placeholder="0.6" step="0.01" min="0" max="10"/></div>
  <div><label>Tipo</label>
  <select id="cf-tipo">
  <option value="forraje">Forraje</option>
@@ -714,6 +778,7 @@ input,select{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,25
  <option value="high">Alto (granos, afrechillo)</option>
  </select>
  <button class="btn-primary" onclick="saveCustomFood()">Guardar alimento</button>
+ <p id="cf-err" class="error-msg hidden"></p>
  <p id="cf-msg" class="success-msg hidden">✓ Alimento guardado</p>
  </div>
 </div>
@@ -764,10 +829,11 @@ input,select{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,25
  </div>
 
  <div class="row2">
- <div><label>Edad (años)</label><input type="number" id="f-edad" value="8" min="1" max="30"/></div>
+ <div id="f-edad-wrap"><label>Edad (años)</label><input type="number" id="f-edad" value="8" min="0" max="30"/></div>
  <div>
  <label>Sexo / estado</label>
- <select id="f-estado">
+ <select id="f-estado" onchange="toggleCrecimiento()">
+ <option value="crecimiento">🐴 En crecimiento (destete a 3 años)</option>
  <option value="castrado">Castrado (capón)</option>
  <option value="yegua_vacia">Yegua vacía</option>
  <option value="yegua_gestante_temprana">Yegua gestante &lt;5 meses</option>
@@ -781,6 +847,26 @@ input,select{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,25
  </div>
  </div>
 
+ <div id="f-crec-box" class="hidden">
+ <div class="alert-box alert-info" style="margin-bottom:12px">
+ <span class="alert-icon">🐴</span>
+ <span>Un caballo en crecimiento no se calcula por su peso de hoy, sino por <strong>cuánto va a pesar de adulto</strong> y <strong>qué edad tiene</strong>. Con esos dos datos la app sabe cuánto debería estar subiendo por día.</span>
+ </div>
+ <div class="row2">
+ <div><label>Edad exacta (meses)</label><input type="number" id="f-edad-meses" value="7" min="4" max="36" step="1"/></div>
+ <div><label>Peso adulto esperado (kg)</label><input type="number" id="f-peso-adulto" value="400" min="150" max="900" step="5"/></div>
+ </div>
+ <p class="hint">El corralero chileno adulto pesa <strong>384 kg</strong> en promedio (medición sobre 275 caballos en 49 criaderos). Si no sabes cuánto va a pesar, mira a la madre y al padre.</p>
+ </div>
+
+ <label>¿Tiene alguna enfermedad metabólica diagnosticada?</label>
+ <select id="f-metabolica" onchange="toggleMetabolica()">
+ <option value="ninguna">No</option>
+ <option value="rabdomiolisis">Sí — rabdomiólisis (se amarra)</option>
+ <option value="laminitis">Sí — laminitis (infosura)</option>
+ </select>
+ <p class="hint" id="f-metabolica-hint">Solo si un veterinario ya se lo diagnosticó. La app no diagnostica: adapta la ración a un diagnóstico que ya existe.</p>
+
  <label>¿Cuántos días a la semana se ensilla?</label>
  <select id="f-dias">
  <option value="0">0 días — descanso total (mantenimiento)</option>
@@ -791,7 +877,7 @@ input,select{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,25
  <option value="5">5 días/semana</option>
  <option value="6" selected>6 días/semana</option>
  </select>
- <p class="hint">1–6 días = ejercicio pesado. 0 días = mantenimiento sin trabajo.</p>
+ <p class="hint" id="f-dias-hint">1–6 días = ejercicio pesado. 0 días = mantenimiento sin trabajo.</p>
 
  <div class="divider"></div>
  <div class="card-title" style="margin-bottom:12px">Dieta disponible</div>
@@ -1346,7 +1432,93 @@ function interp(w, key) {
  }
 }
 
+// ═══════════════════════════════════════════════════════
+// CRECIMIENTO (destete a 3 años)
+// ═══════════════════════════════════════════════════════
+// Esto NO sale de las tablas 16-1 a 16-5 como el resto de la app: sale del modelo de
+// cálculo del propio NRC, cuyo código está publicado en el apéndice del libro. Se
+// transcribió tal cual y se verificó reproduciendo las filas "Growing animals" de las
+// tablas 16-1 a 16-5 (ver comprobaciones al pie de este bloque).
+//
+// Por qué no bastaba con agregar una opción al menú:
+//  · El requerimiento de un caballo en crecimiento no depende de su peso actual sino de
+//    su PESO ADULTO esperado y su EDAD. Dos potrillos de 200 kg —uno de 6 meses que va a
+//    pesar 500, otro de 14 meses que va a pesar 350— necesitan cosas distintas.
+//  · Lo que limita el crecimiento no es la proteína cruda sino la LISINA.
+//  · El calcio y el fósforo dejan de ser un detalle: ahí vive la enfermedad ortopédica
+//    del desarrollo. Por eso el módulo los calcula y los muestra siempre.
+//  · La escala de Henneke está validada en adultos. En crecimiento no se aplica.
+
+// Multiplicador de energía por carga de trabajo (0 = sin trabajo, 1 = liviano, 2 = moderado).
+// El modelo del NRC admite además pesado y muy pesado, pero solo sobre los 12 meses; la app
+// no los ofrece porque un caballo en crecimiento no debería estar en esa carga.
+const CREC_TRABAJO = [
+ {factor:1.0, cpExtra:0,     sudor:0},
+ {factor:1.2, cpExtra:0.089, sudor:0.0025},
+ {factor:1.4, cpExtra:0.177, sudor:0.005}
+];
+
+/**
+ * Requerimientos diarios de un caballo en crecimiento.
+ * @param pesoAdulto  peso adulto esperado, kg
+ * @param edadMeses   edad en MESES (el modelo es continuo, no por categorías)
+ * @param opts.peso   peso real medido. Si no se pasa, usa el de la curva — así es como
+ *                    el NRC arma sus tablas, y así es como se comprueba este código.
+ * @param opts.trabajo 0 | 1 | 2
+ */
+function nrcCrecimiento(pesoAdulto, edadMeses, opts) {
+ opts = opts || {};
+ const A = edadMeses;
+ const t = CREC_TRABAJO[opts.trabajo || 0] || CREC_TRABAJO[0];
+
+ // Ec. 1-3: curva de peso. A los 0 meses el potrillo pesa 9,7% de su peso adulto.
+ const pesoEsperado = pesoAdulto * (9.7 + 90.3 * (1 - Math.exp(-0.0772 * A))) / 100;
+ // Derivada de la anterior, pasada de kg/mes a kg/día (30,4 días por mes).
+ const adg = pesoAdulto * (6.97121 * Math.exp(-0.0772 * A)) / (30.4 * 100);
+
+ // El peso que manda es el medido, si lo hay: el NRC usa la curva solo porque está
+ // armando una tabla y no tiene un animal delante. La app sí lo tiene.
+ const bw = opts.peso > 0 ? opts.peso : pesoEsperado;
+
+ // Ec. 1-1 está publicada en kcal/kg PV/día. El /1000 la pasa a Mcal — equivocarse ahí
+ // es un error de factor 1000.
+ const edMant = (56.5 * Math.pow(A, -0.145)) / 1000 * bw * t.factor;
+ const edGanancia = (1.99 + 1.21 * A - 0.021 * A * A) * adg;
+
+ // Eficiencia con que la proteína se convierte en tejido: cae de 50% a 30% con la edad.
+ // Si el animal trabaja, el modelo del NRC usa 30% sin importar la edad.
+ const efic = opts.trabajo > 0 ? 0.30
+            : A < 6.5 ? 0.50 : A < 8.5 ? 0.45 : A < 10.5 ? 0.40 : A < 11.5 ? 0.35 : 0.30;
+ const sudor = t.sudor * bw;
+ const cpTotal = 1.44 * bw
+               + ((adg * 1000 * 0.2) / efic) / 0.79
+               + t.cpExtra * bw
+               + (sudor * 7.8 * 2 / 0.79);
+
+ return {
+  pesoEsperado: Math.round(pesoEsperado * 10) / 10,
+  adg: Math.round(adg * 1000) / 1000,
+  edTotal: Math.round((edMant + edGanancia) * 100) / 100,
+  edMant: Math.round(edMant * 100) / 100,
+  edGanancia: Math.round(edGanancia * 100) / 100,
+  cpTotal: Math.round(cpTotal),
+  lysTotal: Math.round(0.043 * cpTotal * 10) / 10,   // 4,3% de la proteína (NRC cap. 5)
+  caTotal: Math.round((0.072 * bw + 32 * adg) * 10) / 10,
+  pTotal:  Math.round((0.040 * bw + 17.8 * adg) * 10) / 10,
+  // Cobre y zinc, en mg/día. El cobre está donde vive la enfermedad ortopédica: alimentar
+  // 8 ppm en vez de 25 produjo osteocondritis y deformaciones de miembro en 6 meses
+  // (Hurtig et al., 1993, citado en el NRC). Un potrillo puede tener energía, proteína,
+  // lisina y calcio perfectos y torcerse igual por esto.
+  //   Cu = 0,25 mg por kg de peso vivo
+  //   Zn = 40 mg por kg de materia seca consumida, y el NRC asume 2,5% del peso vivo
+  // Comprobado contra las filas de crecimiento de la tabla 16-3.
+  cuTotal: Math.round(0.25 * bw * 10) / 10,
+  znTotal: Math.round(0.025 * bw * 40)
+ };
+}
+
 function calc(horse) {
+ if (horse.estado === 'crecimiento') return aplicarMetabolica(calcCrecimiento(horse));
  const w = getUltimoPeso(horse); // usa último pesaje si existe
  const dias = parseInt(horse.dias) || 0;
  const estado = horse.estado;
@@ -1375,14 +1547,42 @@ function calc(horse) {
  else if (estado === 'yegua_lactante_1') diffEstado = edLact1 - edMant;
  else if (estado === 'yegua_lactante_3') diffEstado = edLact3 - edMant;
 
- const edTotal = edMant + diffEjercicio + diffEstado;
+ // ─── Energía extra para recuperar un caballo flaco ───
+ // Esto reemplaza al "+20% por condición corporal" que la app decía hacer y no hacía.
+ // Ahora sale del NRC 2007, tabla 1-11 y el texto que la sostiene:
+ //   · 1 punto de condición corporal = 16 a 20 kg de peso  → se usa 18
+ //   · 1 kg de ganancia = 16 a 24 Mcal sobre mantención     → se usa 20
+ // El propio NRC advierte que la tabla viene de datos limitados, que no se probó en
+ // condiciones controladas y que puede fallar en los extremos de la escala. De ahí que:
+ //   · la meta es llegar a 5, nunca más arriba;
+ //   · se reparte en 120 días y no en 60 — el ritmo lento es el que la tabla sostiene mejor
+ //     y el que evita que el motor pida una cantidad de comida que el caballo no puede comer;
+ //   · nunca se piden más de 2 puntos de una vez. Un caballo en 1 o 2 necesita un protocolo
+ //     de realimentación veterinario (NRC cap. 12), no una ración más grande: darle mucho
+ //     de golpe lo puede matar.
+ const CC_KG_POR_PUNTO = 18, CC_MCAL_POR_KG = 20, CC_DIAS_META = 120;
+ const ccActual = getUltimaCC(horse.id);
+ let recuperacion = null;
+ if (ccActual && ccActual < 5) {
+  const puntos = Math.min(2, 5 - ccActual);
+  const kgMeta = puntos * CC_KG_POR_PUNTO;
+  recuperacion = {
+   cc: ccActual,
+   kgMeta,
+   extraMcal: Math.round(kgMeta * CC_MCAL_POR_KG / CC_DIAS_META * 100) / 100,
+   meses: Math.round(CC_DIAS_META / 30),
+   critico: ccActual <= 2
+  };
+ }
+
+ const edTotal = edMant + diffEjercicio + diffEstado + (recuperacion ? recuperacion.extraMcal : 0);
 
  // Proteína cruda mínima (interpolada entre mantenimiento y heavy)
  const cpMant = interp(w, 'cp_mant');
  const cpHeavy = interp(w, 'cp_heavy');
  const cpTotal = dias > 0 ? cpHeavy : cpMant;
 
- return {
+ return aplicarMetabolica({
  edTotal: Math.round(edTotal*100)/100,
  edMant: Math.round(edMant*100)/100,
  diffEjercicio: Math.round(diffEjercicio*100)/100,
@@ -1392,7 +1592,76 @@ function calc(horse) {
  concCap: Math.round(w/100*0.5*100)/100, // kg/día cap 
  starchLimitPerMeal: Math.round(w*4), // g/ración
  cpTotal: Math.round(cpTotal),
- peso: w, dias
+ peso: w, dias, recuperacion,
+ metabolica: horse.metabolica && METABOLICA[horse.metabolica] ? horse.metabolica : null
+ });
+}
+
+/**
+ * Aprieta los topes de una ración cuando hay enfermedad metabólica diagnosticada.
+ * Se aplica encima de lo que ya calculó `calc`, sea adulto o en crecimiento, para que la
+ * regla valga igual en las dos categorías y no haya que duplicarla.
+ */
+function aplicarMetabolica(nrc) {
+ const m = METABOLICA[nrc.metabolica];
+ if (!m) return nrc;
+ nrc.starchLimitPerMeal = Math.min(nrc.starchLimitPerMeal, Math.round(nrc.peso * m.almidonPorKg));
+ nrc.concCap = Math.min(nrc.concCap, Math.round(nrc.peso * m.concPct * 100) / 100);
+ return nrc;
+}
+
+/**
+ * Envuelve el modelo de crecimiento en la misma forma que devuelve calc(), para que el
+ * motor de raciones y las pantallas no tengan que saber de qué categoría se trata.
+ */
+function calcCrecimiento(horse) {
+ const w = getUltimoPeso(horse);
+ const dias = parseInt(horse.dias) || 0;
+ const edadMeses = parseFloat(horse.edadMeses) || 12;
+ const pesoAdulto = parseFloat(horse.pesoAdulto) || 400;
+ // 0 días sin trabajo · 1–3 liviano · 4+ moderado. El NRC ofrece pesado y muy pesado
+ // solo sobre los 12 meses; la app no llega ahí a propósito.
+ const trabajo = dias === 0 ? 0 : dias <= 3 ? 1 : 2;
+
+ const g = nrcCrecimiento(pesoAdulto, edadMeses, {peso:w, trabajo});
+
+ return {
+  edTotal: g.edTotal,
+  edMant: g.edMant,
+  diffEjercicio: 0,
+  diffEstado: g.edGanancia,
+  cpTotal: g.cpTotal,
+  peso: w, dias, recuperacion: null,
+  metabolica: horse.metabolica && METABOLICA[horse.metabolica] ? horse.metabolica : null,
+
+  // Techos propios del crecimiento. Los del adulto no sirven acá:
+  //  · forrMin 1,5% del peso vivo en materia seca. Es decisión de la app, no cifra del
+  //    NRC: baja del 2% del adulto porque el potrillo no tiene capacidad para tanto
+  //    volumen, pero no baja más, porque si el motor no llena forraje primero termina
+  //    tapando el hueco con grano — que es justo lo que hay que evitar.
+  //  · forrMax 2,5%, que es el consumo total que el propio NRC asume para crecimiento
+  //    (nota al pie de las tablas 16-1 a 16-5).
+  //  · Almidón 2 g/kg de peso vivo por ración, no 4: Radicke et al. (1991) midieron caída
+  //    del pH cecal entre 2 y 3 g/kg, y en un potrillo el exceso de carbohidrato no fibroso
+  //    está además asociado a lesiones osteocondrales (Pagan 2003; Treiber et al. 2005).
+  forrMin: Math.round(w*0.015*100)/100,
+  forrMax: Math.round(w*0.025*100)/100,
+  concCap: Math.round(w*0.010*100)/100,
+  starchLimitPerMeal: Math.round(w*2),
+
+  crecimiento: {
+   edadMeses, pesoAdulto, trabajo,
+   pesoEsperado: g.pesoEsperado,
+   adg: g.adg,
+   gananciaMes: Math.round(g.adg*30.4*10)/10,
+   desvioPct: Math.round((w/g.pesoEsperado - 1) * 100),
+   lysTotal: g.lysTotal,
+   caTotal: g.caTotal,
+   pTotal: g.pTotal,
+   cuTotal: g.cuTotal,
+   znTotal: g.znTotal,
+   edGanancia: g.edGanancia
+  }
  };
 }
 
@@ -1416,8 +1685,10 @@ function calcRation(horse, nrc) {
 
  // 3. CONCENTRADO PRINCIPAL — cap ajustado por CC
  let concKg = 0, conc2Kg = 0;
- const ccScoreR = getUltimaCC(horse.id);
- const ccAdjR = getCCFactor(ccScoreR);
+ // La escala de Henneke está validada en caballos adultos. En un potrillo el estado de
+ // carnes no significa lo mismo y recortarle la ración por eso sería inventar. No se aplica.
+ const ccScoreR = nrc.crecimiento ? null : getUltimaCC(horse.id);
+ const ccAdjR = nrc.crecimiento ? {concFactor:1} : getCCFactor(ccScoreR);
  const capTotal = nrc.concCap * ccAdjR.concFactor;
 
  if (deficit > 0) {
@@ -1450,23 +1721,151 @@ function calcRation(horse, nrc) {
  const coveragePct = Math.min(100, Math.round(totalEdFinal / nrc.edTotal * 100));
  const defFinal = Math.max(0, nrc.edTotal - totalEdFinal);
 
- // Almidón por ración
- const starchPerMeal = (concKg * c.starch + conc2Kg * (c2 ? c2.starch : 0)) / 3;
+ // Almidón por ración. Antes dividía siempre por 3 e ignoraba las raciones que el dueño
+ // había elegido: con 2 raciones el almidón por comida es mayor y la app no avisaba.
+ const comidas = Math.max(1, parseInt(horse.comidas) || 3);
+ const starchPerMeal = (concKg * c.starch + conc2Kg * (c2 ? c2.starch : 0)) / comidas;
  const starchLimitKg = nrc.starchLimitPerMeal / 1000;
  const starchWarn = starchPerMeal > starchLimitKg;
 
- // Alertas
+ // Aporte de nutrientes de la ración entera. Devuelve también qué alimentos no declaran
+ // el dato, para no presentar como completo un total al que le falta un ingrediente.
+ const partes = [[f, forrKg], [c, concKg], [c2, conc2Kg]];
+ const aporte = campo => {
+  let total = 0; const faltan = [];
+  partes.forEach(([food, kg]) => {
+   if (!food || !(kg > 0)) return;
+   const g = aportePorKg(food, campo);
+   if (g === null) faltan.push(food.name); else total += kg * g;
+  });
+  return {g: Math.round(total*10)/10, faltan};
+ };
+ const nut = {cp: aporte('cp'), lys: aporte('lys'), ca: aporte('ca'), p: aporte('p'),
+              cu: aporte('cu'), zn: aporte('zn')};
+
+ // Alertas.
+ // Cada una lleva tres textos con destinos distintos:
+ //   corto   — titular en castellano llano. Es lo único que ve el dueño en el veredicto.
+ //   accion  — qué hacer, en una frase. También va al veredicto.
+ //   msg     — el porqué completo. Vive dentro de "Ver detalle" y sale en el PDF.
+ // El orden en que se agregan es el orden de importancia: el veredicto muestra la primera.
  const alerts = [];
- if (capTotal <= concKg + conc2Kg + 0.01)
- alerts.push({type:'warn', icon:'⚡', msg:`Cap aplicado (${Math.round(capTotal*1000)} g/día). Para cubrir el déficit restante considera subir el aceite o agregar un segundo concentrado.`});
+
+ if (nrc.crecimiento) {
+  const cr = nrc.crecimiento;
+  // Savage et al. (1993a) dieron a potrillos un 29% más de energía que la recomendada y
+  // encontraron lesiones de dicondroplasia en TODOS. El exceso de energía no engorda a un
+  // potrillo: le deforma el cartílago de crecimiento.
+  const exceso = totalEdFinal / nrc.edTotal;
+  if (exceso >= 1.25)
+   alerts.push({type:'danger', icon:'🚨', corto:'Está comiendo demasiado para su edad',
+    accion:'Baja el concentrado hasta que la ración deje de sobrar.',
+    msg:`La ración entrega ${Math.round((exceso-1)*100)}% más energía de la que este potrillo necesita. En un caballo en crecimiento ese exceso no se guarda como grasa: acelera la formación del hueso y daña el cartílago de las articulaciones.`});
+  else if (exceso >= 1.10)
+   alerts.push({type:'warn', icon:'⚠️', corto:'Le sobra un poco de comida',
+    accion:'Baja algo el concentrado.',
+    msg:`Sobra un ${Math.round((exceso-1)*100)}% de energía. En un caballo en crecimiento eso no engorda: acelera el crecimiento y castiga la articulación.`});
+
+  // Umbral en 85%, no en 90%: el requerimiento del NRC ya trae margen, y un heno real varía
+  // más que eso entre fardo y fardo. Avisar por un 12% corto es ruido — y el ruido le quita
+  // fuerza al aviso que sí importa.
+  const CORTO = 0.85;
+  if (!nut.lys.faltan.length && nut.lys.g < cr.lysTotal * CORTO)
+   alerts.push({type:'warn', icon:'🧬', corto:'Le falta proteína de calidad para crecer',
+    accion:'Agrega harina de soya, o cambia a un concentrado de crianza.',
+    msg:`Faltan ${Math.round(cr.lysTotal - nut.lys.g)} g de lisina de los ${Math.round(cr.lysTotal)} g diarios. Es el aminoácido que limita el crecimiento: sin él, dar más proteína no sirve de nada.`});
+
+  // El calcio y el fósforo se juzgan por separado y además por su relación. Lo grave de
+  // verdad es la relación invertida: con más fósforo que calcio, el organismo saca calcio
+  // del hueso para compensar. Una relación ancha, en cambio, solo molesta cuando el
+  // fósforo además queda corto — y en Chile, con dietas basadas en alfalfa, es lo normal
+  // pasar de 3:1 sin que eso sea un problema. Por eso no se avisa por el ancho solo.
+  if (!nut.ca.faltan.length && !nut.p.faltan.length && nut.p.g > 0) {
+   const razon = nut.ca.g / nut.p.g;
+   if (razon < 1)
+    alerts.push({type:'danger', icon:'🦴', corto:'Esta ración le va a debilitar el hueso',
+     accion:'Sube el heno de alfalfa y baja los afrechos.',
+     msg:`La ración aporta más fósforo que calcio (${razon.toFixed(2)}:1). En un caballo en crecimiento eso obliga al cuerpo a sacar calcio del hueso para compensar. Nunca debe bajar de 1:1.`});
+   else if (razon < 1.5)
+    alerts.push({type:'warn', icon:'🦴', corto:'El calcio queda justo frente al fósforo',
+     accion:'Un poco más de heno de alfalfa deja el margen cómodo.',
+     msg:`La relación calcio:fósforo queda en ${razon.toFixed(1)}:1. Para un potrillo conviene 1,5:1 o más.`});
+   if (nut.ca.g < cr.caTotal * CORTO)
+    alerts.push({type:'warn', icon:'🦴', corto:'Le falta calcio para el hueso',
+     accion:'Cambia parte del heno por heno o cubos de alfalfa.',
+     msg:`Faltan ${Math.round(cr.caTotal - nut.ca.g)} g de calcio de los ${Math.round(cr.caTotal)} g que necesita al día.`});
+   if (nut.p.g < cr.pTotal * CORTO)
+    alerts.push({type:'warn', icon:'🦴', corto:'Le falta fósforo',
+     accion:'Un poco de afrechillo de trigo o un concentrado de crianza lo cubren.',
+     msg:`Faltan ${Math.round(cr.pTotal - nut.p.g)} g de fósforo de los ${Math.round(cr.pTotal)} g diarios.`});
+  }
+
+  // Cobre. Es el aviso más importante del módulo de cría y también el más incómodo, porque
+  // casi siempre va a haber un concentrado comercial de por medio que no publica el dato.
+  // Se distinguen los dos casos, porque la acción del dueño es distinta en cada uno.
+  if (nut.cu.g < cr.cuTotal) {
+   if (nut.cu.faltan.length)
+    alerts.push({type:'warn', icon:'🔩', corto:'No se puede saber si le alcanza el cobre',
+     accion:`Pregúntale al vendedor cuánto cobre y zinc trae ${nut.cu.faltan.join(' y ')}.`,
+     msg:`El forraje y el grano aportan ${Math.round(nut.cu.g)} mg de cobre y este potrillo necesita ${cr.cuTotal} mg al día. La diferencia debería ponerla el concentrado, pero el fabricante no publica el dato. El cobre importa acá más que en ningún otro lado: alimentar 8 partes por millón en vez de 25 produjo osteocondritis y patas torcidas en 6 meses.`});
+   else
+    alerts.push({type:'warn', icon:'🔩', corto:'Le falta cobre para el cartílago',
+     accion:'Necesita un balanceador mineral o un concentrado de crianza fortificado.',
+     msg:`Aporta ${Math.round(nut.cu.g)} mg de cobre y necesita ${cr.cuTotal} mg al día. El forraje y el grano solos casi nunca alcanzan. La falta de cobre está asociada a osteocondrosis y deformaciones de miembro — un potrillo puede tener la energía, la proteína y el calcio perfectos y torcerse igual por esto.`});
+  }
+
+  if (Math.abs(cr.desvioPct) >= 15)
+   alerts.push(cr.desvioPct < 0
+    ? {type:'warn', icon:'📏', corto:'Está más chico de lo que le corresponde',
+       accion:'Súbelo de a poco, no de golpe.',
+       msg:`Pesa ${Math.abs(cr.desvioPct)}% menos de lo esperado para ${cr.edadMeses} meses (${Math.round(cr.pesoEsperado)} kg). Recuperarlo rápido es peor que ir atrasado: el crecimiento acelerado es en sí un factor de riesgo para las articulaciones.`}
+    : {type:'warn', icon:'📏', corto:'Está más grande de lo que le corresponde',
+       accion:'Revisa que no venga de un exceso de concentrado.',
+       msg:`Pesa ${cr.desvioPct}% más de lo esperado para ${cr.edadMeses} meses (${Math.round(cr.pesoEsperado)} kg).`});
+ }
+ // Antes este aviso salía cada vez que el concentrado tocaba el techo, aunque el heno
+ // hubiera terminado cubriendo el 100%: hablaba de "el déficit restante" sin que quedara
+ // déficit alguno.
+ // Enfermedad metabólica: el aceite es la diferencia entre las dos. En rabdomiólisis se
+ // pide; en laminitis se avisa de lo contrario.
+ if (nrc.metabolica) {
+  const m = METABOLICA[nrc.metabolica];
+  if (m.reponerConGrasa && aceite_ml < 100 && defFinal > 0.5)
+   alerts.push({type:'warn', icon:'🫙', corto:'Le falta la energía que ya no viene del grano',
+    accion:'Sube el aceite a 100–300 ml al día, repartido en las comidas.',
+    msg:`Con ${m.nombre} el grano está limitado a propósito. Esa energía tiene que volver como grasa: aceite vegetal, afrecho de arroz o coseta de remolacha. Es la indicación del NRC para estos casos.`});
+  if (!m.reponerConGrasa && aceite_ml > 150)
+   alerts.push({type:'warn', icon:'🫙', corto:'Demasiado aceite para un caballo con laminitis',
+    accion:'Baja el aceite y deja que la energía venga del forraje.',
+    msg:`Con laminitis conviene ser prudente con la grasa agregada: se ha visto que produce intolerancia a la glucosa, y la resistencia a la insulina es uno de los factores de riesgo de la laminitis.`});
+ }
+ // Un caballo en 1 o 2 no es un problema de ración, es un caso clínico. Va primero de todo.
+ if (nrc.recuperacion && nrc.recuperacion.critico)
+ alerts.push({type:'danger', icon:'🚑', corto:'Está demasiado flaco para arreglarlo con comida',
+  accion:'Que lo vea un veterinario antes de subirle la ración.',
+  msg:`Con esta condición corporal (${nrc.recuperacion.cc} de 9), aumentarle la comida de golpe puede matarlo: se llama síndrome de realimentación. La ración que ves ya sube la energía de a poco, pero un caballo así necesita un protocolo veterinario, no una ración más grande.`});
+ // Lo grave primero: pasarse de grano en una comida es lo que produce cólico.
  if (starchWarn)
- alerts.push({type:'danger', icon:'🚨', msg:`Almidón por ración: ${Math.round(starchPerMeal*1000)} g — supera el límite de ${nrc.starchLimitPerMeal} g. Divide en más raciones o reduce el concentrado.`});
- if (c.risk === 'high')
- alerts.push({type:'warn', icon:'⚠️', msg:`${c.name} es de alto riesgo. Divide siempre en 3 raciones iguales y respeta el cap diario.`});
- if (c2 && c2.risk === 'high')
- alerts.push({type:'warn', icon:'⚠️', msg:`${c2.name} — correlación positiva con cólicos (). Techo máximo: 1 kg/día.`});
+ alerts.push({type:'danger', icon:'🚨', corto:'Demasiado grano de una vez',
+  accion:`Reparte la misma cantidad en más comidas al día, o baja el concentrado.`,
+  msg:`Cada comida lleva ${Math.round(starchPerMeal*1000)} g de almidón y el techo seguro para este caballo es ${nrc.starchLimitPerMeal} g. El almidón que el intestino delgado no alcanza a digerir fermenta en el grueso y baja su pH: ese es el mecanismo del cólico.`});
  if (defFinal > 1)
- alerts.push({type:'warn', icon:'💡', msg:`Déficit energético de ${defFinal.toFixed(1)} Mcal. Opciones: aumentar aceite, agregar segundo concentrado, o aumentar el heno sobre el mínimo.`});
+ alerts.push({type:'warn', icon:'💡', corto:'La ración no alcanza a cubrirlo',
+  accion:'Sube el aceite, agrega un segundo concentrado, o usa un heno de mejor calidad.',
+  msg:`Quedan ${defFinal.toFixed(1)} Mcal sin cubrir después de llenar el forraje hasta su techo y el concentrado hasta el suyo.`});
+ if (capTotal <= concKg + conc2Kg + 0.01 && defFinal > 0.1)
+ alerts.push({type:'warn', icon:'⚡', corto:'El concentrado llegó a su tope',
+  accion:'Sube el aceite antes que pasarte de grano.',
+  msg:`El concentrado alcanzó su techo diario (${Math.round(capTotal*1000)} g) y todavía faltan ${defFinal.toFixed(1)} Mcal.`});
+ // Recordatorio de manejo, NO un problema de la ración: la cantidad ya está dentro de lo
+ // seguro. Va como `info` justamente para que no le gane el veredicto a algo que sí hay que
+ // corregir — si no, el caso más común de todos (un caballo sano comiendo avena) le saldría
+ // al dueño en amarillo, y dejaría de creerle a la app cuando el aviso sea de verdad.
+ const riesgosos = [c, c2].filter(x => x && x.risk === 'high').map(x => x.name);
+ if (riesgosos.length)
+ alerts.push({type:'info', icon:'⚠️', corto:`${riesgosos.join(' y ')}: repartir bien`,
+  accion:`Reparte ${riesgosos.length>1?'los dos':'esa cantidad'} en partes iguales entre las ${comidas} comidas, nunca de una sola vez.`,
+  msg:`${riesgosos.join(' y ')} ${riesgosos.length>1?'son alimentos':'es un alimento'} de alto almidón. La cantidad diaria está dentro de lo seguro; lo que importa es no darla junta.`});
 
  return {
  forrKg: Math.round(forrKg*100)/100,
@@ -1476,7 +1875,7 @@ function calcRation(horse, nrc) {
  totalEd: Math.round(totalEdFinal*100)/100,
  coveragePct,
  defFinal: Math.round(defFinal*100)/100,
- alerts,
+ alerts, nut, comidas,
  starchPerMealG: Math.round(starchPerMeal*1000)
  };
 }
@@ -1484,16 +1883,132 @@ function calcRation(horse, nrc) {
 // ═══════════════════════════════════════════════════════
 // BASE DE ALIMENTOS
 // ═══════════════════════════════════════════════════════
+// Los valores de esta tabla NO están escritos a mano. Se generan con un script a partir
+// del NRC 2007 (ver scratchpad/gen2.mjs). Procedencia:
+//   · Composición (MS, PC, lisina, grasa, NDF, ADF, cenizas) → tabla 16-6, primera mitad
+//   · Calcio y fósforo                                       → tabla 16-6, segunda mitad
+//   · Almidón                                                → tabla 2-2
+//   · Energía digestible equina:
+//       – FORRAJES: ecuación de forrajes del NRC (Fonnesbeck 1981, 108 ensayos de digestión
+//         en caballos), p.4:  DE = 4,22 − 0,11·%ADF + 0,0332·%PC + 0,00112·%ADF²
+//       – CONCENTRADOS Y SUBPRODUCTOS: ecuación de Pagan (1998), misma página.
+//         No se usa en forrajes porque el propio NRC advierte que Pagan "no predice con
+//         exactitud el contenido de DE de algunos alimentos altos en fibra".
+//       – Donde el NRC publica un valor MEDIDO que contradice la ecuación, manda el medido:
+//         afrecho de arroz 3,17 Mcal/kg; coseta de remolacha, medido ~20% sobre el estimado.
+// Todas las ED quedan expresadas TAL COMO SE ENTREGA (× materia seca), que es lo que el
+// motor espera. La ED impresa en la tabla 16-6 es de vacas lecheras (NRC 2001) y no se usa.
+//
+// Qué alimentos entran: solo los que se usan de verdad en criaderos de rodeo chilenos,
+// según Bull et al. (2019, Animals) — 275 caballos pesados en 49 criaderos entre la
+// Región Metropolitana y Los Lagos. Los porcentajes que aparecen en cada desc son de ahí.
+// No se agregan alimentos "de catálogo" que nadie ocupa.
+//
+// Convenciones de los campos:
+//   ed      Mcal/kg TAL COMO SE ENTREGA, siempre.
+//   cp/lys/ca/p  % en BASE SECA, salvo que el alimento traiga `base:'tq'`, que marca los
+//               análisis garantizados de sacos comerciales: esos vienen tal cual ofrecido.
+//               Usar siempre los helpers de más abajo, nunca el campo directo.
+//   est     el fabricante no publica ese dato y el valor es estimación nuestra.
+//   nota    advertencia clínica que se muestra en la lista de alimentos.
+//   maxKg   tope diario razonable para ese alimento.
+//
+// Ojo con los sacos comerciales: los fabricantes chilenos rotulan "energía metabolizable",
+// pero las cifras que publican están en el rango de la energía DIGESTIBLE para alimentos de
+// esa composición, que es lo que usa el NRC. Se cargan tal como las publican, sin convertir.
 const BASE_FOODS = {
- heno_alfalfa: {name:'Heno de alfalfa', ed:2.2, starch:0.02, ms:0.88, unit:'kg', emoji:'🌿', type:'forraje', risk:'low', builtin:true, desc:'2.2 Mcal/kg · 2% almidón · forraje base'},
- pasto_fresco: {name:'Pasto fresco', ed:2.5, starch:0.03, ms:0.25, unit:'kg', emoji:'🌱', type:'forraje', risk:'low', builtin:true, desc:'2.5 Mcal/kg · 3% almidón · 25% MS'},
- avena: {name:'Avena en grano', ed:3.0, starch:0.44, ms:0.89, unit:'kg', emoji:'🌾', type:'concentrado', risk:'high', builtin:true, desc:'3.0 Mcal/kg · 44% almidón'},
- maiz: {name:'Maíz molido', ed:3.4, starch:0.72, ms:0.88, unit:'kg', emoji:'🌽', type:'concentrado', risk:'high', builtin:true, desc:'3.4 Mcal/kg · 72% almidón — máx. riesgo'},
- pellet: {name:'Pellet comercial',ed:2.8, starch:0.20, ms:0.90, unit:'kg', emoji:'🟤', type:'concentrado', risk:'med', builtin:true, desc:'2.8 Mcal/kg · 20% almidón'},
- afrechillo_trigo: {name:'Afrechillo de trigo', ed:3.2, starch:0.22, ms:0.89, unit:'kg', emoji:'🟫', type:'subproducto', risk:'high', builtin:true, desc:'3.2 Mcal/kg · 22% almidón · r=0.7 cólicos (Bull 2019)'},
- afrecho_trigo: {name:'Afrecho de trigo (salvado)', ed:3.4, starch:0.26, ms:0.89, unit:'kg', emoji:'🪵', type:'subproducto', risk:'high', builtin:true, desc:'3.4 Mcal/kg · 26% almidón · Correlación positiva con cólicos'},
- aceite: {name:'Aceite vegetal', ed:8.2, starch:0.00, ms:1.00, unit:'ml', emoji:'🫙', type:'energia', risk:'low', builtin:true, desc:'8.2 Mcal/kg · 0% almidón — seguro'}
+ // ─── Forrajes ───
+ heno_alfalfa: {name:'Heno de alfalfa', ed:2.09, starch:0.024, ms:0.839, cp:20.8, lys:1.06, ca:1.37, p:0.30, cu:9, zn:24, unit:'kg', emoji:'🌿', type:'forraje', risk:'low', builtin:true, desc:'2,09 Mcal/kg · 2,4% almidón · 20,8% proteína — el forraje más usado en criaderos de rodeo (44%)'},
+ heno_pradera: {name:'Heno de pradera polifítica', ed:1.78, starch:0.028, ms:0.838, cp:13.3, lys:0.46, ca:0.66, p:0.29, cu:9, zn:25, unit:'kg', emoji:'🌾', type:'forraje', risk:'low', builtin:true, desc:'1,78 Mcal/kg · 2,8% almidón · 13,3% proteína — típico de la zona sur (24%)'},
+ heno_ballica: {name:'Heno de ballica', ed:2.07, starch:0.028, ms:0.84, cp:18.0, lys:0.63, ca:0.72, p:0.34, cu:9, zn:27, unit:'kg', emoji:'🍃', type:'forraje', risk:'low', builtin:true, desc:'2,07 Mcal/kg · 2,8% almidón · 18% proteína — corte temprano, más proteína que la pradera madura'},
+ heno_avena: {name:'Heno de avena', ed:1.70, starch:0.028, ms:0.85, cp:9.1, lys:0.32, ca:0.37, p:0.22, cu:8, zn:23, unit:'kg', emoji:'🌾', type:'forraje', risk:'low', builtin:true, desc:'1,70 Mcal/kg · 2,8% almidón · 9,1% proteína — forraje de volumen, bajo aporte proteico'},
+ cubos_alfalfa: {name:'Cubos / pellets de alfalfa', ed:2.22, starch:0.02, ms:0.903, cp:19.2, lys:0.83, ca:1.47, p:0.28, cu:9, zn:28, unit:'kg', emoji:'🟩', type:'forraje', risk:'low', builtin:true, desc:'2,22 Mcal/kg · 2% almidón · 19,2% proteína — alfalfa deshidratada y molida, usada en el 23% de los caballos'},
+
+ // ─── Granos ───
+ avena: {name:'Avena en grano', ed:2.90, starch:0.443, ms:0.90, cp:13.2, lys:0.55, ca:0.07, p:0.30, cu:6.7, zn:39, unit:'kg', emoji:'🌾', type:'concentrado', risk:'high', builtin:true, desc:'2,90 Mcal/kg · 44,3% almidón · 13,2% proteína — el grano más usado: 77% de los que dan grano'},
+ maiz: {name:'Maíz molido', ed:3.41, starch:0.723, ms:0.881, cp:9.1, lys:0.26, ca:0.04, p:0.30, cu:3, zn:27, unit:'kg', emoji:'🌽', type:'concentrado', risk:'high', builtin:true, desc:'3,41 Mcal/kg · 72,3% almidón · 9,1% proteína — correlación r=0,6 con cólicos'},
+
+ // ─── Subproductos ───
+ afrecho_trigo: {name:'Afrecho de trigo (salvado)', ed:2.42, starch:0.26, ms:0.891, cp:17.3, lys:0.70, ca:0.13, p:1.18, cu:11, zn:85, unit:'kg', emoji:'🪵', type:'subproducto', risk:'high', builtin:true,
+  desc:'2,42 Mcal/kg · 26% almidón · 17,3% proteína — presente en el 60% de los criaderos',
+  nota:'Aporta 9 veces más fósforo que calcio. En cantidad y sin corregir con calcio, descalcifica el hueso.'},
+ afrechillo_trigo: {name:'Afrechillo de trigo (moyuelo)', ed:2.63, starch:0.26, ms:0.895, cp:18.5, lys:0.67, ca:0.16, p:1.02, cu:10, zn:91, unit:'kg', emoji:'🟫', type:'subproducto', risk:'high', builtin:true,
+  desc:'2,63 Mcal/kg · 26% almidón · 18,5% proteína — r=0,7 con cólicos, la correlación más alta medida',
+  nota:'Calcio y fósforo invertidos. Además es el alimento con la correlación más alta con cólico de todo el estudio chileno.'},
+ coseta_remolacha: {name:'Coseta de remolacha', ed:2.68, starch:0.013, ms:0.883, cp:10.0, lys:0.44, ca:0.91, p:0.09, cu:11, zn:22, unit:'kg', emoji:'🟠', type:'subproducto', risk:'low', builtin:true, desc:'2,68 Mcal/kg · 1,3% almidón · 10% proteína — energía de grano sin el almidón del grano'},
+ afrecho_arroz: {name:'Afrecho de arroz (salvado)', ed:3.17, starch:0.184, ms:0.906, cp:15.5, lys:0.72, fat:15.2, ca:0.07, p:1.78, maxKg:2, cu:10, zn:71, unit:'kg', emoji:'🍚', type:'subproducto', risk:'med', builtin:true,
+  desc:'3,17 Mcal/kg · 15,2% grasa · 18,4% almidón — la energía de un grano con menos de la mitad de su almidón',
+  nota:'Aporta 25 veces más fósforo que calcio, el desbalance más grande de toda la tabla. Sobre 1 kg/día hay que corregir con calcio. Máximo 2 kg/día. Pide que sea <b>estabilizado</b>: sin estabilizar la grasa se enrancia en semanas.'},
+ harina_soya: {name:'Harina de soya', ed:2.73, starch:0.02, ms:0.891, cp:49.9, lys:3.13, ca:0.35, p:0.70, cu:16, zn:58, unit:'kg', emoji:'🫘', type:'subproducto', risk:'low', builtin:true, desc:'2,73 Mcal/kg · 2% almidón · 49,9% proteína — la oleaginosa más usada, y la mejor fuente de lisina'},
+ harina_raps: {name:'Harina de raps (canola)', ed:2.54, starch:0.02, ms:0.903, cp:37.8, lys:2.12, ca:0.75, p:1.10, cu:5, zn:61, unit:'kg', emoji:'🌻', type:'subproducto', risk:'low', builtin:true, desc:'2,54 Mcal/kg · 2% almidón · 37,8% proteína — alternativa proteica a la soya'},
+
+ // ─── Concentrados comerciales: Performance (Grupo Proa, ex Champion — KER Chile) ───
+ // Los seis valores salen de las fichas técnicas en PDF del fabricante
+ // (alimentosperformance.cl/caballos/downloads/*.pdf, bajadas el 2026-08-07), columna T.C.O.
+ perf_mantencion: {name:'Performance Mantención', ed:2.8, starch:0.20, ms:0.87, cp:12.0, lys:0.40, ca:0.6, p:0.5, base:'tq', unit:'kg', emoji:'🟤', type:'concentrado', risk:'med', builtin:true, marca:'Performance', est:'almidon', desc:'2,8 Mcal/kg · 12% proteína · lisina 0,40% — baja actividad, caballos mayores o en descanso'},
+ perf_training: {name:'Performance Training', ed:3.1, starch:0.30, ms:0.87, cp:11.0, lys:0.35, ca:0.6, p:0.5, base:'tq', unit:'kg', emoji:'🟤', type:'concentrado', risk:'med', builtin:true, marca:'Performance', est:'almidon', desc:'3,1 Mcal/kg · 11% proteína · lisina 0,35% — carga de trabajo moderada a alta'},
+ perf_sweetfeed: {name:'Performance Sweet Feed', ed:3.0, starch:0.30, ms:0.87, cp:14.0, lys:0.30, ca:0.6, p:0.5, base:'tq', unit:'kg', emoji:'🟤', type:'concentrado', risk:'med', builtin:true, marca:'Performance', est:'almidon', desc:'3,0 Mcal/kg · 14% proteína · lisina 0,30% — multipartícula, para trabajo exigente'},
+ perf_crianza: {name:'Performance Crianza', ed:3.0, starch:0.25, ms:0.87, cp:16.0, lys:1.10, ca:0.9, p:0.8, base:'tq', unit:'kg', emoji:'🟤', type:'concentrado', risk:'med', builtin:true, marca:'Performance', est:'almidon', desc:'3,0 Mcal/kg · 16% proteína · lisina 1,10% · Ca 0,9 / P 0,8 — gestación final, lactancia y potrillos desde el destete'},
+ perf_potrillo: {name:'Performance Potrillo', ed:2.8, starch:0.25, ms:0.87, cp:13.0, lys:0.55, ca:0.4, p:0.3, base:'tq', unit:'kg', emoji:'🟤', type:'concentrado', risk:'med', builtin:true, marca:'Performance', est:'almidon', desc:'2,8 Mcal/kg · 13% proteína · lisina 0,55% — crecimiento hasta 24 meses'},
+ perf_balancepro: {name:'Performance Balance Pro', ed:3.5, starch:0.15, ms:0.87, cp:30.0, lys:0.10, ca:0.3, p:0.2, base:'tq', unit:'kg', emoji:'🟤', type:'concentrado', risk:'med', builtin:true, marca:'Performance', est:'almidon',
+  desc:'3,5 Mcal/kg · 30% proteína — balanceador para complementar avena y forraje, no para dar solo',
+  nota:'Su ficha declara 30% de proteína pero solo 0,10% de lisina, cifra que ningún alimento de 30% de proteína puede tener. Está cargada tal como la publica el fabricante, así que la app lo dará por deficiente en lisina. Antes de usarlo en un potrillo, pide el análisis al vendedor.'},
+
+ // ─── Concentrados comerciales: Alimentos Cisternas ───
+ cist_adulto: {name:'Cisternas Adulto', ed:2.6, starch:0.20, ms:0.86, cp:13.0, base:'tq', unit:'kg', emoji:'⬛', type:'concentrado', risk:'med', builtin:true, marca:'Cisternas', est:'energia', desc:'13% proteína · 15% fibra — trabajo esporádico o liviano. Energía no declarada'},
+ cist_training: {name:'Cisternas Training', ed:3.2, starch:0.30, ms:0.86, cp:12.0, base:'tq', unit:'kg', emoji:'⬛', type:'concentrado', risk:'med', builtin:true, marca:'Cisternas', est:'almidon', desc:'3,2 Mcal/kg · 12% proteína · 6% fibra — ejercicio o trabajo constante'},
+ cist_supertraining: {name:'Cisternas Super Training', ed:3.2, starch:0.30, ms:0.86, cp:12.8, base:'tq', unit:'kg', emoji:'⬛', type:'concentrado', risk:'med', builtin:true, marca:'Cisternas', est:'almidon', desc:'3,2 Mcal/kg · 12,8% proteína — alta competencia. Incluye levaduras para estabilizar el pH del intestino posterior'},
+ cist_potrillo: {name:'Cisternas Potrillo', ed:2.8, starch:0.25, ms:0.86, cp:20.0, base:'tq', unit:'kg', emoji:'⬛', type:'concentrado', risk:'med', builtin:true, marca:'Cisternas', est:'energia', desc:'20% proteína — desde el nacimiento hasta los 2 años. Energía no declarada'},
+
+ // ─── Concentrados comerciales: Copeval y El Globo ───
+ copeval_training_premium: {name:'Copeval Equino Training Premium', ed:2.57, starch:0.25, ms:0.86, cp:11.84, ca:1.82, p:0.36, base:'tq', unit:'kg', emoji:'🔶', type:'concentrado', risk:'med', builtin:true, marca:'Copeval', est:'almidon', desc:'2,57 Mcal/kg · 11,84% proteína · Ca 1,82 / P 0,36 — alta exigencia física'},
+ globo_mantencion: {name:'El Globo Mantención', ed:2.6, starch:0.20, ms:0.86, cp:12.0, base:'tq', unit:'kg', emoji:'🔵', type:'concentrado', risk:'med', builtin:true, marca:'El Globo', est:'todo', desc:'Concentrado de mantención — el fabricante no publica análisis garantizado'},
+
+ // ─── Genérico: el 83% del concentrado comercial usado es de producción local sin marca ───
+ concentrado_local: {name:'Concentrado comercial local (sin marca)', ed:2.8, starch:0.25, ms:0.87, cp:13.0, base:'tq', unit:'kg', emoji:'📦', type:'concentrado', risk:'med', builtin:true, est:'todo', desc:'Valores promedio de concentrado de producción local — ajústalos con el saco a mano si los trae'},
+
+ // ─── Aceites ───
+ aceite_linaza: {name:'Aceite de linaza', ed:8.2, starch:0.00, ms:1.00, unit:'ml', emoji:'🫙', type:'energia', risk:'low', builtin:true, desc:'8.2 Mcal/kg · 0% almidón — el aceite más usado en criaderos (60 ml/día)'},
+ aceite_maravilla: {name:'Aceite de maravilla', ed:8.2, starch:0.00, ms:1.00, unit:'ml', emoji:'🫙', type:'energia', risk:'low', builtin:true, desc:'8.2 Mcal/kg · 0% almidón — energía densa sin riesgo de acidosis'}
 };
+
+// Alimentos retirados y con qué se reemplazan. El pastoreo en pradera salió porque no es
+// medible y porque los caballos objetivo no tienen acceso: en Bull et al. (2019) el 100%
+// pasaba al menos 12 horas diarias en pesebrera.
+const FOODS_RETIRADOS = {
+ pasto_fresco: 'heno_pradera',
+ pellet: 'concentrado_local',
+ aceite: 'aceite_linaza'
+};
+
+/**
+ * Cuántos gramos de un nutriente aporta 1 kg de alimento TAL COMO SE ENTREGA.
+ *
+ * Existe porque las dos fuentes de la tabla no usan la misma base: el NRC publica en base
+ * seca y el análisis garantizado de un saco comercial viene tal cual ofrecido. Mezclarlas
+ * sin darse cuenta se equivoca en torno a un 13%, siempre subestimando el forraje.
+ * Devuelve null si el alimento no declara ese nutriente — no 0, porque "no sé" y "cero"
+ * llevan a conclusiones opuestas.
+ */
+const CAMPOS_MG = ['cu','zn']; // estos vienen en mg/kg, no en porcentaje
+function aportePorKg(f, campo) {
+ if (!f || f[campo] == null) return null;
+ const v = f.base === 'tq' ? f[campo] : f[campo] * f.ms;
+ return CAMPOS_MG.includes(campo) ? v : v * 10; // % → g/kg
+}
+
+/** Reapunta los caballos ya guardados que usaban un alimento retirado. */
+function migrarAlimentosRetirados() {
+ const horses = getHorses();
+ let cambios = 0;
+ horses.forEach(h => {
+  ['forraje','concentrado','concentrado2'].forEach(campo => {
+   const reemplazo = FOODS_RETIRADOS[h[campo]];
+   if (reemplazo) { h[campo] = reemplazo; cambios++; }
+  });
+ });
+ if (cambios) saveHorses(horses);
+}
 
 function getAllFoods() {
  const custom = JSON.parse(localStorage.getItem('en_foods') || '[]');
@@ -1517,20 +2032,36 @@ function getUltimaCC(horseId){
  return arr.sort((a,b)=>new Date(b.fecha)-new Date(a.fecha))[0].score;
 }
 
+/**
+ * Ajuste de la ración según condición corporal.
+ *
+ * ⚠️ OJO CON LO QUE ESTA FUNCIÓN DICE Y LO QUE HACE — comprobado el 2026-08-07.
+ * El campo `edFactor` que devolvía **no lo leía nadie en toda la app**: se calculaba y se
+ * tiraba. O sea, el famoso "±20% según condición corporal" no existía. Lo único que llegaba
+ * a ejecutarse era `concFactor`, y solo en condición alta.
+ *
+ * Consecuencias que había en producción:
+ *  · Un caballo flaco (CC 1–3) recibía exactamente la misma ración que uno normal, mientras
+ *    la app le decía al dueño "ración aumentada +20% para recuperación". Un número falso.
+ *  · Un caballo gordo (CC 7–9) tampoco veía su ración reducida: se le cambiaba grano por
+ *    heno, manteniendo el 100% de la energía. Eso es defendible —menos almidón, misma
+ *    fibra— pero no es lo que la etiqueta decía.
+ *
+ * Se quitó `edFactor` para no volver a arrastrar un valor que nadie aplica, y las etiquetas
+ * ahora describen lo que de verdad ocurre. **Recalibrar el óptimo del corralero es una
+ * decisión aparte y todavía no está resuelta** (Muñoz et al. 2019 encontró moda 7 en 48
+ * caballos de campeonato nacional, pero es descriptivo, no normativo).
+ */
 function getCCFactor(cc){
- if(!cc) return {edFactor:1.0, concFactor:1.0, label:null, tipo:null};
+ if(!cc) return {concFactor:1.0, label:null, tipo:null};
  const n = parseInt(cc);
- if(n<=3){
- const ed = n===1?1.20:n===2?1.15:1.10;
- return {edFactor:ed, concFactor:1.0, label:`CC ${n} — ración aumentada +${Math.round((ed-1)*100)}% para recuperación`, tipo:'bajo'};
- }
- if(n>=7){
- const ed = n===7?0.90:n===8?0.85:0.80;
- const cap = 0.5; // reduce cap concentrado a la mitad
- const warn = n>=8?' — riesgo de laminitis':'';
- return {edFactor:ed, concFactor:cap, label:`CC ${n} — ración reducida ${Math.round((1-ed)*100)}% por sobrepeso${warn}`, tipo:'alto'};
- }
- return {edFactor:1.0, concFactor:1.0, label:null, tipo:null};
+ if(n<=4) return {concFactor:1.0, tipo:'bajo',
+  label:'Está por debajo del peso que le conviene, así que la ración lleva energía extra para que suba de a poco. Si aun así no alcanza, el camino es aceite —que aporta mucha energía en poco volumen— antes que más grano.'};
+ if(n>=7) return {concFactor:0.5, tipo:'alto',
+  label:n>=8
+   ? 'Está muy pasado de peso. La ración cambia grano por forraje: la misma energía, con menos almidón. Con esta condición hay riesgo real de laminitis.'
+   : 'Está algo pasado de peso. La ración cambia grano por forraje: la misma energía, con menos almidón.'};
+ return {concFactor:1.0, label:null, tipo:null};
 }
 
 function getUltimoPeso(horse){
@@ -1693,6 +2224,7 @@ let pesoCalculado = null;
 // RENDERIZADO: CABALLOS
 // ═══════════════════════════════════════════════════════
 const ESTADO_MAP = {
+ crecimiento:'En crecimiento',
  castrado:'Castrado', yegua_vacia:'Yegua vacía',
  yegua_gestante_temprana:'Gest. temprana', yegua_gestante_9:'Gest. 9 meses',
  yegua_gestante_11:'Gest. 11 meses', yegua_lactante_1:'Lact. 1–2 m',
@@ -1714,10 +2246,15 @@ function renderHorseList() {
  const ccActual = getUltimaCC(h.id);
  const ccColor = ccActual ? (ccActual<=3?'var(--danger-text)':ccActual<=6?'var(--ok-text)':'var(--warn-text)') : 'var(--text3)';
  const ccText = ccActual ? `CC ${ccActual}` : 'Sin CC';
- let badge = '<span class="badge badge-ok">✓ Ración OK</span>';
- if (r?.alerts?.some(a=>a.type==='danger')) badge = '<span class="badge badge-danger">⚠ Riesgo almidón</span>';
- else if (r?.alerts?.length) badge = '<span class="badge badge-warn">⚡ Revisar</span>';
- if (r?.coveragePct < 90) badge = '<span class="badge badge-warn">'+r.coveragePct+'% cobertura</span>';
+ // La insignia nombra el problema real y respeta la gravedad. Antes decía "Riesgo almidón"
+ // ante cualquier alerta grave —un potrillo con el calcio invertido incluido— y además la
+ // línea de cobertura sobrescribía la roja con una amarilla, tapando el caso más grave.
+ const grave = r?.alerts?.find(a=>a.type==='danger');
+ const aviso = r?.alerts?.find(a=>a.type==='warn');
+ let badge = '<span class="badge badge-ok">✓ Ración lista</span>';
+ if (grave) badge = `<span class="badge badge-danger">⚠ ${esc(grave.corto || 'Revisar')}</span>`;
+ else if (r?.coveragePct < 90) badge = '<span class="badge badge-warn">⚡ Le falta comida</span>';
+ else if (aviso) badge = `<span class="badge badge-warn">⚡ ${esc(aviso.corto || 'Revisar')}</span>`;
  return `<div class="horse-card${sel?' selected':''}" onclick="selectHorse('${h.id}')">
  <div style="display:flex;justify-content:space-between;align-items:flex-start">
  <div style="display:flex;align-items:center;gap:12px">
@@ -1745,6 +2282,88 @@ function selectHorse(id) {
  showTab('racion');
 }
 
+// ═══════════════════════════════════════════════════════
+// RESPALDO DE DATOS
+// ═══════════════════════════════════════════════════════
+// Todo vive en localStorage, o sea en este teléfono y en ninguna otra parte. Perder el
+// equipo es perder años de pesajes. Esto lo evita con un archivo, sin cuentas ni servidor.
+//
+// Deliberadamente NO se respaldan `en_license`, `en_plan` ni `en_device`: si viajaran en el
+// archivo, cualquiera que lo recibiera se llevaría el Premium de otro. El código de
+// activación es el respaldo de la licencia y ya se entrega por separado.
+const RESPALDO_PREFIJOS = ['en_horses', 'en_foods', 'en_supl_', 'en_peso_', 'en_cc_'];
+
+function esClaveDeDatos(k) {
+ return RESPALDO_PREFIJOS.some(p => p.endsWith('_') ? k.startsWith(p) : k === p);
+}
+
+function descargarRespaldo() {
+ const datos = {};
+ for (let i = 0; i < localStorage.length; i++) {
+  const k = localStorage.key(i);
+  if (esClaveDeDatos(k)) datos[k] = localStorage.getItem(k);
+ }
+ const paquete = {app:'equinutricion', version:1, fecha:new Date().toISOString(), datos};
+ const hoy = new Date().toISOString().slice(0,10);
+ const a = document.createElement('a');
+ a.href = URL.createObjectURL(new Blob([JSON.stringify(paquete)], {type:'application/json'}));
+ a.download = `equinutricion-respaldo-${hoy}.json`;
+ a.click();
+ URL.revokeObjectURL(a.href);
+ const n = getHorses().length;
+ mostrarRespaldoMsg(`✓ Respaldo descargado — ${n} ${n===1?'caballo':'caballos'} con todo su historial`, false);
+}
+
+function restaurarRespaldo(event) {
+ const file = event.target.files[0];
+ event.target.value = ''; // permite volver a elegir el mismo archivo
+ if (!file) return;
+ const reader = new FileReader();
+ reader.onload = e => {
+  let paquete;
+  try { paquete = JSON.parse(e.target.result); }
+  catch { return mostrarRespaldoMsg('Ese archivo no es un respaldo de EquiNutrición.', true); }
+  if (!paquete || paquete.app !== 'equinutricion' || !paquete.datos)
+   return mostrarRespaldoMsg('Ese archivo no es un respaldo de EquiNutrición.', true);
+
+  const claves = Object.keys(paquete.datos).filter(esClaveDeDatos);
+  if (!claves.length) return mostrarRespaldoMsg('El respaldo está vacío.', true);
+
+  let caballos = 0;
+  try { caballos = JSON.parse(paquete.datos['en_horses'] || '[]').length; } catch {}
+  const actuales = getHorses().length;
+  // Reemplaza, no mezcla: mezclar sin saber cuál versión es la buena es cómo se duplican
+  // caballos. Se dice en voz alta lo que se va a perder antes de hacerlo.
+  const aviso = actuales
+   ? `Vas a reemplazar los ${actuales} ${actuales===1?'caballo que tienes':'caballos que tienes'} por ${caballos} del respaldo.\n\nLo que hay ahora en este teléfono se pierde. ¿Continuar?`
+   : `Se van a restaurar ${caballos} ${caballos===1?'caballo':'caballos'}. ¿Continuar?`;
+  if (!confirm(aviso)) return;
+
+  // Fuera lo viejo primero, o quedan caballos del respaldo mezclados con los de antes.
+  for (let i = localStorage.length - 1; i >= 0; i--) {
+   const k = localStorage.key(i);
+   if (esClaveDeDatos(k)) localStorage.removeItem(k);
+  }
+  claves.forEach(k => localStorage.setItem(k, paquete.datos[k]));
+
+  selectedId = null;
+  migrarAlimentosRetirados();
+  updateFoodSelects(); renderHorseList(); showRacion(); renderFoodList();
+  mostrarRespaldoMsg(`✓ Restaurado — ${caballos} ${caballos===1?'caballo':'caballos'} de vuelta`, false);
+ };
+ reader.readAsText(file);
+}
+
+function mostrarRespaldoMsg(texto, esError) {
+ const ok = document.getElementById('respaldo-msg');
+ const err = document.getElementById('respaldo-err');
+ const el = esError ? err : ok, otro = esError ? ok : err;
+ otro.classList.add('hidden');
+ el.textContent = texto;
+ el.classList.remove('hidden');
+ setTimeout(() => el.classList.add('hidden'), 5000);
+}
+
 function deleteHorse(id) {
  if (!confirm('¿Eliminar este caballo?')) return;
  saveHorses(getHorses().filter(h => h.id !== id));
@@ -1767,6 +2386,82 @@ function fmtPesoPorRacion(kg, n) {
 // ═══════════════════════════════════════════════════════
 // RENDERIZADO: RACIÓN
 // ═══════════════════════════════════════════════════════
+/**
+ * La respuesta a "¿está bien mi caballo?", en una tarjeta.
+ *
+ * El dueño no quiere leer siete avisos: quiere saber si puede seguir con su día o si tiene
+ * que hacer algo. Así que se muestra UNA sola cosa — la más importante — con qué hacer al
+ * respecto. El resto sigue existiendo, pero dentro de "Ver detalle".
+ */
+function veredicto(h, nrc, r) {
+ const grave = r.alerts.find(a => a.type === 'danger');
+ const aviso = r.alerts.find(a => a.type === 'warn');
+ // Solo se cuentan las que piden una decisión. Los recordatorios de manejo (`info`) no
+ // engrosan el "hay N cosas más": si no hay nada que corregir, no debe parecer que sí.
+ const porResolver = r.alerts.filter(a => a.type === 'danger' || a.type === 'warn').length;
+ const restantes = Math.max(0, porResolver - ((grave || aviso) ? 1 : 0));
+
+ let clase, icono, titulo, sub, accion = '';
+ if (grave) {
+  clase = 'v-problema'; icono = '⚠'; titulo = grave.corto || 'Hay algo que corregir';
+  sub = grave.msg; accion = grave.accion || '';
+ } else if (r.coveragePct < 90) {
+  clase = 'v-atencion'; icono = '!'; titulo = `A ${h.nombre} le falta comida`;
+  sub = `Con los alimentos elegidos la ración se queda corta y no alcanza a cubrir lo que gasta.`;
+  accion = 'Sube el aceite, agrega un segundo concentrado, o cambia a un heno de mejor calidad.';
+ } else if (aviso) {
+  clase = 'v-atencion'; icono = '!'; titulo = aviso.corto || 'Hay algo que revisar';
+  sub = aviso.msg; accion = aviso.accion || '';
+ } else {
+  clase = 'v-ok'; icono = '✓'; titulo = `${h.nombre} está bien alimentado`;
+  sub = nrc.crecimiento
+   ? 'Su ración cubre lo que necesita para crecer sin apurarlo.'
+   : 'Su ración cubre todo lo que necesita para el trabajo que está haciendo.';
+ }
+
+ // Una línea de crecimiento, siempre. Es lo único del módulo de cría que el dueño ve sin
+ // abrir el detalle, y es lo que de verdad le interesa: si su potrillo va bien o no.
+ let crecHtml = '';
+ if (nrc.crecimiento) {
+  const cr = nrc.crecimiento;
+  const dentro = Math.abs(cr.desvioPct) < 15;
+  crecHtml = `<div class="vcrec">${dentro
+   ? `Su peso va bien para la edad: ${nrc.peso} kg a los ${cr.edadMeses} meses. Debería seguir subiendo unos <strong>${cr.gananciaMes} kg al mes</strong>.`
+   : `Su peso: ${nrc.peso} kg, cuando a los ${cr.edadMeses} meses le corresponderían unos ${Math.round(cr.pesoEsperado)} kg. Debería subir unos <strong>${cr.gananciaMes} kg al mes</strong>.`}</div>`;
+ }
+
+ // Si hay enfermedad diagnosticada, el dueño tiene que ver que la ración la está tomando en
+ // cuenta. Si no, va a pensar que la app no se enteró y la va a corregir a mano.
+ let metHtml = '';
+ if (nrc.metabolica) {
+  const m = METABOLICA[nrc.metabolica];
+  metHtml = `<div class="vcrec">Ración adaptada a su <strong>${m.nombre}</strong>: el grano quedó limitado a la mitad de lo normal. ${m.reponerConGrasa ? 'La energía que falta debe venir de la grasa.' : 'La energía debe venir del forraje, no de la grasa.'}</div>`;
+ }
+
+ // Si está flaco, lo que el dueño quiere saber no es "+20%" sino cuánto tiene que subir y
+ // cuánto le va a tomar. Eso sí es accionable.
+ let recHtml = '';
+ if (nrc.recuperacion && !nrc.recuperacion.critico) {
+  const rc = nrc.recuperacion;
+  recHtml = `<div class="vcrec">Para llegar a su peso ideal tiene que subir unos <strong>${rc.kgMeta} kg</strong>. La ración ya lleva la energía extra para lograrlo en unos <strong>${rc.meses} meses</strong> — ese ritmo lento es a propósito.</div>`;
+ }
+
+ const masHtml = restantes > 0
+  ? `<div class="vcrec">${restantes === 1 ? 'Hay otra cosa menor' : `Hay otras ${restantes} cosas menores`} en <strong>Ver detalle</strong>.</div>`
+  : '';
+
+ document.getElementById('veredicto').innerHTML = `
+  <div class="veredicto ${clase}">
+   <div class="vico">${icono}</div>
+   <div style="flex:1;min-width:0">
+    <div class="vtit">${esc(titulo)}</div>
+    <div class="vsub">${sub}</div>
+    ${accion ? `<div class="vacc">→ ${accion}</div>` : ''}
+    ${metHtml}${crecHtml}${recHtml}${masHtml}
+   </div>
+  </div>`;
+}
+
 function showRacion() {
  const h = getHorses().find(x => x.id === selectedId);
  const foods = getAllFoods();
@@ -1782,35 +2477,54 @@ function showRacion() {
  const r = calcRation(h, nrc);
  if (!r) return;
 
+ veredicto(h, nrc, r);
+
  // Métricas
  const pctColor = r.coveragePct >= 90 ? '#1D9E75' : r.coveragePct >= 75 ? '#f0b84a' : '#f08080';
- // Nutrientes
- // Proteína cruda estimada desde ingredientes de la ración
- const foodsNutr = getAllFoods();
- const fFood = foodsNutr[h.forraje];
- const cFood = foodsNutr[h.concentrado];
- const c2Food = h.concentrado2 && h.concentrado2!=='ninguno' ? foodsNutr[h.concentrado2] : null;
- // CP% por tipo de alimento (valores promedio)
- const cpPct = {heno_alfalfa:0.185,pasto_fresco:0.14,avena:0.13,maiz:0.09,pellet:0.14,afrechillo_trigo:0.155,afrecho_trigo:0.155};
- const getCp = (food,key) => food ? (cpPct[key]||0.12) : 0;
- const cpAportado = Math.round(
- (r.forrKg * getCp(fFood,h.forraje) +
- r.concKg * getCp(cFood,h.concentrado) +
- (c2Food&&r.conc2Kg>0 ? r.conc2Kg*getCp(c2Food,h.concentrado2) : 0)) * 1000
- );
- const cpPct2 = Math.min(100, Math.round(cpAportado/nrc.cpTotal*100));
- const cpColor = cpPct2>=100?'var(--accent)':cpPct2>=80?'#f0b84a':'#E24B4A';
- document.getElementById('nutrient-grid').innerHTML = `
- <div class="nutrient-item" style="grid-column:1/-1">
- <div class="nutrient-label">Proteína cruda — requerimiento diario</div>
- <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
- <div class="nutrient-val">${nrc.cpTotal} <span class="nutrient-unit">g/día requerido</span></div>
- <div style="font-size:13px;font-weight:700;color:${cpColor}">${cpAportado} g aportado (${cpPct2}%)</div>
- </div>
- <div class="nutrient-bar"><div class="nutrient-fill" style="width:${cpPct2}%;background:${cpColor}"></div></div>
- ${cpPct2<80?'<div style="font-size:11px;color:#f0b84a;margin-top:6px">Déficit de proteína. Considera agregar harina de soja o aumentar el heno de alfalfa.</div>':''}
- </div>`;
+ // Proteína, lisina, calcio y fósforo salen de cada alimento. Antes había un mapa fijo de
+ // siete alimentos y todo el resto caía en un 12% inventado — la harina de soya incluida.
+ /** Una barra de nutriente: requerido vs aportado, con aviso si falta un dato. */
+ const barra = (label, unidad, req, dato, consejo) => {
+  const pct = req > 0 ? Math.min(100, Math.round(dato.g/req*100)) : 0;
+  const color = pct>=100?'var(--accent)':pct>=80?'#f0b84a':'#E24B4A';
+  return `<div class="nutrient-item" style="grid-column:1/-1">
+   <div class="nutrient-label">${label}</div>
+   <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+    <div class="nutrient-val">${req} <span class="nutrient-unit">${unidad} requerido</span></div>
+    <div style="font-size:13px;font-weight:700;color:${color}">${dato.g} ${unidad.split('/')[0]} aportado (${pct}%)</div>
+   </div>
+   <div class="nutrient-bar"><div class="nutrient-fill" style="width:${pct}%;background:${color}"></div></div>
+   ${pct<80&&!dato.faltan.length&&consejo?`<div style="font-size:11px;color:#f0b84a;margin-top:6px">${consejo}</div>`:''}
+   ${dato.faltan.length?`<div style="font-size:11px;color:#f0b84a;margin-top:6px">No está el dato de ${esc(dato.faltan.join(' ni '))}, así que el aporte real es mayor que el que se muestra. Complétalo en Alimentos.</div>`:''}
+  </div>`;
+ };
 
+ const cr = nrc.crecimiento;
+ let nutHtml = barra('Proteína cruda — requerimiento diario', 'g/día', nrc.cpTotal, r.nut.cp,
+   'Déficit de proteína. Considera agregar harina de soya o aumentar el heno de alfalfa.');
+
+ if (cr) {
+  const razon = (r.nut.ca.g > 0 && r.nut.p.g > 0) ? r.nut.ca.g / r.nut.p.g : null;
+  const razonOk = razon !== null && razon >= 1.5;
+  nutHtml += barra('Lisina — el aminoácido que limita el crecimiento', 'g/día', cr.lysTotal, r.nut.lys,
+    'Sin lisina suficiente el potrillo no aprovecha la proteína aunque le sobre. La harina de soya es la fuente más barata.');
+  nutHtml += barra('Calcio', 'g/día', cr.caTotal, r.nut.ca,
+    'Falta calcio. El heno de alfalfa y los cubos de alfalfa son las fuentes más simples.');
+  nutHtml += barra('Fósforo', 'g/día', cr.pTotal, r.nut.p, '');
+  nutHtml += barra('Cobre — desarrollo del cartílago', 'mg/día', cr.cuTotal, r.nut.cu,
+    'Sin cobre suficiente el cartílago de crecimiento se forma mal. Un balanceador mineral lo cubre.');
+  nutHtml += barra('Zinc', 'mg/día', cr.znTotal, r.nut.zn, '');
+  if (razon !== null && !r.nut.ca.faltan.length && !r.nut.p.faltan.length) {
+   nutHtml += `<div class="nutrient-item" style="grid-column:1/-1">
+    <div class="nutrient-label">Relación calcio : fósforo de la ración</div>
+    <div class="nutrient-val" style="color:${razonOk?'var(--accent)':'#E24B4A'}">${razon.toFixed(1)} : 1</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px">Lo que no puede pasar es que baje de <strong>1:1</strong>: con más fósforo que calcio, el cuerpo saca calcio del hueso. Lo cómodo es <strong>de 1,5:1 para arriba</strong>. Que quede ancha no es problema mientras el fósforo alcance — con dietas de alfalfa es lo habitual.</div>
+   </div>`;
+  }
+ }
+ document.getElementById('nutrient-grid').innerHTML = nutHtml;
+
+ const desvColor = cr ? (Math.abs(cr.desvioPct) < 10 ? 'var(--accent)' : Math.abs(cr.desvioPct) < 20 ? '#f0b84a' : '#E24B4A') : '';
  document.getElementById('metrics-grid').innerHTML = `
  <div class="metric accent">
  <div class="mlabel">Energía requerida</div>
@@ -1819,15 +2533,23 @@ function showRacion() {
  <div class="metric">
  <div class="mlabel">Cobertura lograda</div>
  <div class="mvalue" style="color:${pctColor}">${r.coveragePct}<span class="munit">%</span></div>
+ </div>` + (cr ? `
+ <div class="metric">
+ <div class="mlabel">Debería subir</div>
+ <div class="mvalue">${cr.gananciaMes} <span class="munit">kg/mes</span></div>
  </div>
  <div class="metric">
- <div class="mlabel">Forraje mínimo</div>
- <div class="mvalue">${nrc.forrMin} <span class="munit">kg MS/día</span></div>
+ <div class="mlabel">Peso esperado a los ${cr.edadMeses} meses</div>
+ <div class="mvalue" style="color:${desvColor}">${cr.pesoEsperado} <span class="munit">kg (va ${cr.desvioPct >= 0 ? '+' : ''}${cr.desvioPct}%)</span></div>
+ </div>` : `
+ <div class="metric">
+ <div class="mlabel">Forraje mínimo al día</div>
+ <div class="mvalue">${Math.round(nrc.forrMin/ (getAllFoods()[h.forraje]?.ms || 1) * 10)/10} <span class="munit">kg de heno</span></div>
  </div>
  <div class="metric">
- <div class="mlabel">Almidón máx/ración</div>
+ <div class="mlabel">Techo de almidón por comida</div>
  <div class="mvalue">${nrc.starchLimitPerMeal} <span class="munit">g</span></div>
- </div>`;
+ </div>`);
 
 
 
@@ -1872,21 +2594,27 @@ function showRacion() {
  const ccUlt = getUltimaCC(h.id);
  const ccAdjView = getCCFactor(ccUlt);
  let ccAlertHtml = '';
- if(ccAdjView.tipo==='bajo'){
- ccAlertHtml = `<div class="alert-box alert-warn"><div><strong>Condición corporal baja (CC ${ccUlt})</strong><br/>${ccAdjView.label}. La ración se incrementó para apoyar la recuperación. Prioriza el aumento de heno antes que concentrado.</div></div>`;
+ if (nrc.crecimiento) {
+  // Henneke se validó en adultos. Mostrarla acá haría creer que la ración se ajustó por
+  // ella, y no se ajusta. Se dice en voz alta en vez de dejarlo implícito.
+  ccAlertHtml = `<div class="alert-box alert-info"><div><strong>La condición corporal no ajusta esta ración.</strong><br/>La escala de Henneke está validada en caballos adultos; en un potrillo el estado de carnes no significa lo mismo. Lo que se sigue acá es el <strong>peso frente a la curva de crecimiento</strong>, arriba.</div></div>`;
+ } else if(ccAdjView.tipo==='bajo'){
+ ccAlertHtml = `<div class="alert-box alert-warn"><div><strong>Está flaco (${ccUlt} de 9)</strong><br/>${ccAdjView.label}</div></div>`;
  } else if(ccAdjView.tipo==='alto'){
  const isLaminitis = parseInt(ccUlt)>=8;
- ccAlertHtml = `<div class="alert-box alert-${isLaminitis?'danger':'warn'}"><div><strong>Condición corporal alta (CC ${ccUlt})</strong><br/>${ccAdjView.label}. El cap de concentrado se redujo a la mitad. ${isLaminitis?'Riesgo real de laminitis — consulta veterinaria.':''}</div></div>`;
+ ccAlertHtml = `<div class="alert-box alert-${isLaminitis?'danger':'warn'}"><div><strong>Está pasado de peso (${ccUlt} de 9)</strong><br/>${ccAdjView.label}${isLaminitis?' Conviene que lo vea un veterinario.':''}</div></div>`;
  } else if(!ccUlt){
- ccAlertHtml = `<div class="alert-box alert-info"><div>Sin condición corporal registrada. Registra la CC en la pestaña C. Corporal para ajustar la ración automáticamente.</div></div>`;
+ ccAlertHtml = `<div class="alert-box alert-info"><div>Todavía no has registrado cómo está de carnes. Hazlo en la pestaña <strong>Estado</strong> y la app podrá afinar la ración.</div></div>`;
  }
 
  let alertHtml = r.alerts.map(a =>
  `<div class="alert-box alert-${a.type}"><div>${a.msg}</div></div>`
  ).join('');
 
+ // "Alto riesgo" no le dice nada al dueño —¿riesgo de qué?— y encima contradice que la app
+ // se lo esté recomendando. Lo que necesita saber es cómo darlo.
  const rl = {low:'risk-low', med:'risk-med', high:'risk-high'};
- const rn = {low:'Bajo riesgo', med:'Riesgo medio', high:'Alto riesgo'};
+ const rn = {low:'Se puede dar libre', med:'Dar medido', high:'Repartir en las comidas'};
 
  document.getElementById('ingredient-detail').innerHTML = `${ccAlertHtml}${alertHtml}
  <div class="ing-row">
@@ -1906,11 +2634,11 @@ function showRacion() {
  <div class="ing-val">${r.aceite_ml} ml/día</div>
  </div>` : ''}
  <div class="prog-wrap">
- <div class="prog-label"><span>Cobertura energética</span><span>${r.totalEd} / ${nrc.edTotal} Mcal</span></div>
+ <div class="prog-label"><span>Energía del día</span><span>${r.coveragePct >= 100 ? 'completa' : r.coveragePct + '% cubierta'} · ${r.totalEd} de ${nrc.edTotal} Mcal</span></div>
  <div class="prog-bar"><div class="prog-fill" style="width:${r.coveragePct}%;background:${pctColor}"></div></div>
  </div>
  ${r.starchPerMealG > 0 ? `<div class="prog-wrap" style="margin-top:8px">
- <div class="prog-label"><span>Almidón por ración</span><span>${r.starchPerMealG} g / ${nrc.starchLimitPerMeal} g límite</span></div>
+ <div class="prog-label"><span>Grano por comida</span><span>${r.starchPerMealG > nrc.starchLimitPerMeal ? 'se pasa del techo' : 'dentro de lo seguro'} · ${r.starchPerMealG} de ${nrc.starchLimitPerMeal} g de almidón</span></div>
  <div class="prog-bar"><div class="prog-fill" style="width:${Math.min(100,Math.round(r.starchPerMealG/nrc.starchLimitPerMeal*100))}%;background:${r.starchPerMealG>nrc.starchLimitPerMeal?'#f08080':'#1D9E75'}"></div></div>
  </div>` : ''}`;
 
@@ -1974,22 +2702,62 @@ function renderFoodList() {
  const rc = {low:'risk-low', med:'risk-med', high:'risk-high'}[f.risk||'low'];
  const rn = {low:'Bajo riesgo', med:'Riesgo medio', high:'Alto riesgo'}[f.risk||'low'];
  const del = f.builtin ? '' : `<button class="btn-danger" onclick="deleteFood('${id}')" style="padding:5px 9px;font-size:11px">Eliminar</button>`;
- html += `<div class="food-item"><div><div class="food-name">${f.emoji||'🔹'} ${esc(f.name)}<span class="risk-tag ${rc}">${rn}</span></div><div class="food-detail">${f.desc||f.ed+' Mcal/kg'}</div></div>${del}</div>`;
+ // Los fabricantes casi nunca declaran almidón, y algunos ni la energía. Se avisa,
+ // en vez de presentar una estimación nuestra como si fuera dato del saco.
+ const estMsg = {almidon:'almidón estimado', energia:'energía estimada', todo:'valores estimados'}[f.est];
+ const est = estMsg ? `<span class="risk-tag risk-med" title="El fabricante no publica este dato">≈ ${estMsg}</span>` : '';
+ // Ca:P bajo 1 significa más fósforo que calcio: en cantidad, saca calcio del hueso.
+ const cap = (f.ca > 0 && f.p > 0) ? f.ca / f.p : null;
+ const capTag = cap !== null && cap < 1 ? `<span class="risk-tag risk-high" title="Aporta más fósforo que calcio">Ca:P 1:${(1/cap).toFixed(cap<0.2?0:1)}</span>` : '';
+ const nota = f.nota ? `<div class="food-nota">⚠ ${f.nota}</div>` : '';
+ html += `<div class="food-item"><div><div class="food-name">${f.emoji||'🔹'} ${esc(f.name)}<span class="risk-tag ${rc}">${rn}</span>${est}${capTag}</div><div class="food-detail">${f.desc||f.ed+' Mcal/kg'}</div>${nota}</div>${del}</div>`;
  });
  });
  document.getElementById('food-list').innerHTML = html;
 }
 
+const CF_CAMPOS = ['cf-nombre','cf-ed','cf-cp','cf-starch','cf-ms','cf-ca','cf-p','cf-lys'];
+
 function saveCustomFood() {
- const nombre = document.getElementById('cf-nombre').value.trim();
- const ed = parseFloat(document.getElementById('cf-ed').value);
- const starch = parseFloat(document.getElementById('cf-starch').value) / 100;
- const ms = parseFloat(document.getElementById('cf-ms').value) / 100;
- if (!nombre || isNaN(ed) || isNaN(starch) || isNaN(ms)) return;
+ const val = id => document.getElementById(id).value.trim();
+ const num = id => val(id) === '' ? null : parseFloat(val(id));
+ const nombre = val('cf-nombre');
+ const ed = num('cf-ed'), cp = num('cf-cp'), ms = num('cf-ms');
+ const starch = num('cf-starch'), ca = num('cf-ca'), p = num('cf-p'), lys = num('cf-lys');
+
+ // Antes esto era un `return` mudo: el botón no hacía nada y no decía por qué.
+ const falta = [];
+ if (!nombre) falta.push('el nombre');
+ if (ed === null || !(ed >= 0)) falta.push('la energía');
+ if (ms === null || !(ms > 0 && ms <= 100)) falta.push('la materia seca (entre 1 y 100%)');
+ if (cp !== null && !(cp >= 0 && cp <= 100)) falta.push('una proteína entre 0 y 100%');
+ if (starch !== null && !(starch >= 0 && starch <= 100)) falta.push('un almidón entre 0 y 100%');
+ const err = document.getElementById('cf-err');
+ if (falta.length) {
+  err.textContent = 'Falta ' + falta.join(', ') + '.';
+  err.classList.remove('hidden');
+  return;
+ }
+ err.classList.add('hidden');
+
  const id = 'custom_'+Date.now();
- const f = {id, name:nombre, ed, starch, ms, unit:'kg', emoji:'🔹', type:document.getElementById('cf-tipo').value, risk:document.getElementById('cf-riesgo').value, builtin:false, desc:`${ed} Mcal/kg · ${Math.round(starch*100)}% almidón · personalizado`};
+ // base:'tq' porque lo que se copia es la etiqueta del saco, que va tal cual ofrecido.
+ const f = {id, name:nombre, ed, ms:ms/100, base:'tq', unit:'kg', emoji:'🔹',
+  starch: starch === null ? 0 : starch/100,
+  type:document.getElementById('cf-tipo').value,
+  risk:document.getElementById('cf-riesgo').value, builtin:false};
+ if (cp !== null) f.cp = cp;
+ if (ca !== null) f.ca = ca;
+ if (p !== null) f.p = p;
+ if (lys !== null) f.lys = lys;
+ if (starch === null) f.est = 'almidon';
+ const trozos = [`${ed} Mcal/kg`];
+ if (starch !== null) trozos.push(`${starch}% almidón`);
+ if (cp !== null) trozos.push(`${cp}% proteína`);
+ f.desc = trozos.join(' · ') + ' · personalizado';
+
  const arr = getCustomFoods(); arr.push(f); saveCustomFoods(arr);
- ['cf-nombre','cf-ed','cf-starch','cf-ms'].forEach(id => document.getElementById(id).value = '');
+ CF_CAMPOS.forEach(c => document.getElementById(c).value = '');
  const msg = document.getElementById('cf-msg'); msg.classList.remove('hidden');
  setTimeout(() => msg.classList.add('hidden'), 2500);
  renderFoodList(); updateFoodSelects();
@@ -2014,6 +2782,60 @@ function updateFoodSelects() {
 // ═══════════════════════════════════════════════════════
 // GUARDAR / EDITAR CABALLO
 // ═══════════════════════════════════════════════════════
+/**
+ * Las dos enfermedades metabólicas comparten una regla y se separan en la otra.
+ *
+ * IGUAL en ambas: bajar el almidón y el azúcar por comida. Es la indicación principal de
+ * las dos, y el NRC da la misma cifra — Potter et al. (1992) recomiendan no pasar de
+ * 2 a 4 g de almidón por kg de peso vivo por comida. Estos caballos van al extremo bajo: 2.
+ *
+ * DISTINTO, y por eso NO puede ser un solo botón:
+ *   · En rabdomiólisis la energía que se le quita al grano **se repone con grasa**. El NRC
+ *     lo indica explícitamente: aceite vegetal, afrecho de arroz o coseta de remolacha.
+ *   · En laminitis la grasa es una precaución, no un remedio. El propio NRC advierte que la
+ *     suplementación con aceite produjo intolerancia a la glucosa en ponis, y que la
+ *     resistencia a la insulina es factor de riesgo de laminitis. Además estos caballos
+ *     suelen estar obesos, así que reponer la energía es justamente lo que no se quiere.
+ */
+const METABOLICA = {
+ rabdomiolisis: {
+  nombre:'rabdomiólisis',
+  almidonPorKg: 2,
+  concPct: 0.0025,          // la mitad del tope normal
+  reponerConGrasa: true,
+  consejo:'Reemplaza el grano por aceite, afrecho de arroz o coseta de remolacha: dan energía sin almidón.'
+ },
+ laminitis: {
+  nombre:'laminitis',
+  almidonPorKg: 2,
+  concPct: 0.0025,
+  reponerConGrasa: false,
+  consejo:'Baja el grano y no lo reemplaces con aceite: en un caballo con laminitis la grasa agregada puede empeorar la resistencia a la insulina. La energía debe venir del forraje.'
+ }
+};
+
+/** Cambia el texto de ayuda según la enfermedad elegida. */
+function toggleMetabolica() {
+ const v = document.getElementById('f-metabolica').value;
+ const hint = document.getElementById('f-metabolica-hint');
+ hint.textContent = v === 'ninguna'
+  ? 'Solo si un veterinario ya se lo diagnosticó. La app no diagnostica: adapta la ración a un diagnóstico que ya existe.'
+  : METABOLICA[v].consejo + ' La ración se recalcula sola.';
+}
+
+/** Muestra los dos campos que solo tienen sentido en un caballo en crecimiento. */
+function toggleCrecimiento() {
+ const esCrec = document.getElementById('f-estado').value === 'crecimiento';
+ document.getElementById('f-crec-box').classList.toggle('hidden', !esCrec);
+ // La edad en años no se usa en ningún cálculo y en crecimiento solo confunde: la que
+ // manda es la de meses, que está en el bloque de abajo.
+ document.getElementById('f-edad-wrap').style.visibility = esCrec ? 'hidden' : '';
+ const hint = document.getElementById('f-dias-hint');
+ if (hint) hint.textContent = esCrec
+  ? '0 días = sin trabajo · 1–3 días = trabajo liviano · 4 o más = moderado. En crecimiento la app no ofrece carga pesada a propósito.'
+  : '1–6 días = ejercicio pesado. 0 días = mantenimiento sin trabajo.';
+}
+
 function openEditHorse(id) {
  const h = getHorses().find(x => x.id === id);
  if (!h) return;
@@ -2023,6 +2845,11 @@ function openEditHorse(id) {
  document.getElementById('f-nombre').value = h.nombre;
  document.getElementById('f-edad').value = h.edad;
  document.getElementById('f-estado').value = h.estado;
+ document.getElementById('f-metabolica').value = h.metabolica || 'ninguna';
+ toggleMetabolica();
+ document.getElementById('f-edad-meses').value = h.edadMeses || 7;
+ document.getElementById('f-peso-adulto').value = h.pesoAdulto || 400;
+ toggleCrecimiento();
  document.getElementById('f-dias').value = h.dias;
  document.getElementById('f-forraje').value = h.forraje;
  document.getElementById('f-concentrado').value = h.concentrado;
@@ -2046,10 +2873,20 @@ function cancelEdit() {
  resetFotoForm();
  document.getElementById('f-peso-wrap').classList.remove('hidden');
  document.getElementById('f-peso-edit-note').classList.add('hidden');
+ toggleCrecimiento();
  document.getElementById('form-caballo-title').textContent = 'Registrar caballo';
  document.getElementById('btn-guardar-caballo').textContent = 'Guardar caballo';
  document.getElementById('btn-cancelar-edicion').classList.add('hidden');
  showTab('caballos');
+}
+
+/** Los dos campos de crecimiento, solo si la categoría los usa. */
+function datosCrecimiento() {
+ if (document.getElementById('f-estado').value !== 'crecimiento') return {};
+ return {
+  edadMeses: parseFloat(document.getElementById('f-edad-meses').value) || 7,
+  pesoAdulto: parseFloat(document.getElementById('f-peso-adulto').value) || 400
+ };
 }
 
 function saveHorse() {
@@ -2058,6 +2895,13 @@ function saveHorse() {
  const isEdit = !!editId;
 
  if (!nombre) { alert('Ingresa el nombre del caballo'); return; }
+
+ if (document.getElementById('f-estado').value === 'crecimiento') {
+  const m = parseFloat(document.getElementById('f-edad-meses').value);
+  const pa = parseFloat(document.getElementById('f-peso-adulto').value);
+  if (!(m >= 4 && m <= 36)) { alert('La edad en meses debe estar entre 4 y 36. Bajo los 4 meses el potrillo todavía mama y el cálculo no aplica; sobre los 36 ya es adulto.'); return; }
+  if (!(pa >= 150 && pa <= 900)) { alert('El peso adulto esperado debe estar entre 150 y 900 kg.'); return; }
+ }
 
  // Verificar límite de plan
  if (!isEdit) {
@@ -2085,6 +2929,8 @@ function saveHorse() {
  nombre,
  edad: parseInt(document.getElementById('f-edad').value) || 8,
  estado: document.getElementById('f-estado').value,
+ ...datosCrecimiento(),
+ metabolica: document.getElementById('f-metabolica').value,
  dias: document.getElementById('f-dias').value,
  forraje: document.getElementById('f-forraje').value,
  concentrado: document.getElementById('f-concentrado').value,
@@ -2104,6 +2950,8 @@ function saveHorse() {
  id: Date.now().toString(), nombre, peso,
  edad: parseInt(document.getElementById('f-edad').value) || 8,
  estado: document.getElementById('f-estado').value,
+ ...datosCrecimiento(),
+ metabolica: document.getElementById('f-metabolica').value,
  dias: document.getElementById('f-dias').value,
  forraje: document.getElementById('f-forraje').value,
  concentrado: document.getElementById('f-concentrado').value,
@@ -2155,7 +3003,12 @@ function calcularPeso() {
  const peso = Math.round((pt * pt * lei) / 11877);
  pesoCalculado = peso;
  const estado = document.getElementById('f-estado').value;
- const ref = RAZA_PESO_REF[estado] || 384;
+ // En crecimiento el peso de referencia no es el de la raza adulta sino el que le
+ // corresponde a esa edad según la curva del NRC.
+ const ref = estado === 'crecimiento'
+  ? nrcCrecimiento(parseFloat(document.getElementById('f-peso-adulto').value) || 400,
+                   parseFloat(document.getElementById('f-edad-meses').value) || 7).pesoEsperado
+  : (RAZA_PESO_REF[estado] || 384);
  const diff = Math.abs(peso - ref) / ref;
  const boxCalc = document.getElementById('peso-calculado');
  const boxSegunda = document.getElementById('segunda-medicion');
@@ -2640,6 +3493,10 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
  // La licencia se verifica antes del primer render para que isPremium() ya
  // tenga la respuesta. Funciona sin conexión: solo usa la clave pública.
  await verifyLicense();
+
+ // Antes de pintar nada: reapunta los caballos que usaban un alimento retirado,
+ // o su ración quedaría en blanco sin explicación.
+ migrarAlimentosRetirados();
 
  updateFoodSelects();
  renderHorseList();
