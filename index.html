@@ -1950,9 +1950,6 @@ const BASE_FOODS = {
  perf_sweetfeed: {name:'Performance Sweet Feed', ed:3.0, starch:0.30, ms:0.87, cp:14.0, lys:0.30, ca:0.6, p:0.5, base:'tq', unit:'kg', emoji:'🟤', type:'concentrado', risk:'med', builtin:true, marca:'Performance', est:'almidon', desc:'3,0 Mcal/kg · 14% proteína · lisina 0,30% — multipartícula, para trabajo exigente'},
  perf_crianza: {name:'Performance Crianza', ed:3.0, starch:0.25, ms:0.87, cp:16.0, lys:1.10, ca:0.9, p:0.8, base:'tq', unit:'kg', emoji:'🟤', type:'concentrado', risk:'med', builtin:true, marca:'Performance', est:'almidon', desc:'3,0 Mcal/kg · 16% proteína · lisina 1,10% · Ca 0,9 / P 0,8 — gestación final, lactancia y potrillos desde el destete'},
  perf_potrillo: {name:'Performance Potrillo', ed:2.8, starch:0.25, ms:0.87, cp:13.0, lys:0.55, ca:0.4, p:0.3, base:'tq', unit:'kg', emoji:'🟤', type:'concentrado', risk:'med', builtin:true, marca:'Performance', est:'almidon', desc:'2,8 Mcal/kg · 13% proteína · lisina 0,55% — crecimiento hasta 24 meses'},
- perf_balancepro: {name:'Performance Balance Pro', ed:3.5, starch:0.15, ms:0.87, cp:30.0, lys:0.10, ca:0.3, p:0.2, base:'tq', unit:'kg', emoji:'🟤', type:'concentrado', risk:'med', builtin:true, marca:'Performance', est:'almidon',
-  desc:'3,5 Mcal/kg · 30% proteína — balanceador para complementar avena y forraje, no para dar solo',
-  nota:'Su ficha declara 30% de proteína pero solo 0,10% de lisina, cifra que ningún alimento de 30% de proteína puede tener. Está cargada tal como la publica el fabricante, así que la app lo dará por deficiente en lisina. Antes de usarlo en un potrillo, pide el análisis al vendedor.'},
 
  // ─── Concentrados comerciales: Alimentos Cisternas ───
  cist_adulto: {name:'Cisternas Adulto', ed:2.6, starch:0.20, ms:0.86, cp:13.0, base:'tq', unit:'kg', emoji:'⬛', type:'concentrado', risk:'med', builtin:true, marca:'Cisternas', est:'energia', desc:'13% proteína · 15% fibra — trabajo esporádico o liviano. Energía no declarada'},
@@ -1975,10 +1972,19 @@ const BASE_FOODS = {
 // Alimentos retirados y con qué se reemplazan. El pastoreo en pradera salió porque no es
 // medible y porque los caballos objetivo no tienen acceso: en Bull et al. (2019) el 100%
 // pasaba al menos 12 horas diarias en pesebrera.
+//
+// Performance Balance Pro salió el 2026-08-12, por decisión de Luis. Su ficha declaraba 30%
+// de proteína con 0,10% de lisina, cifra imposible —la harina de soya, con 49,9% de proteína,
+// tiene 3,13%—. Cargado tal cual, el motor lo daba por deficiente en lisina y mandaba corregir
+// una carencia que probablemente no existe; cargado "arreglado", habríamos inventado un dato
+// del saco. Sin análisis real del fabricante no hay tercera opción honesta, así que se retira.
+// Se reemplaza por Performance Crianza: misma marca, mismo rol de complemento proteico, y con
+// la lisina declarada de forma coherente (1,10%).
 const FOODS_RETIRADOS = {
  pasto_fresco: 'heno_pradera',
  pellet: 'concentrado_local',
- aceite: 'aceite_linaza'
+ aceite: 'aceite_linaza',
+ perf_balancepro: 'perf_crianza'
 };
 
 /**
