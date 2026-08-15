@@ -5,3 +5,6 @@ node_modules/
 # Códigos antiguos: no vuelven a subirse al repositorio público
 scripts/legacy-codes.json
 scripts/legacy-codes.kv.json
+
+# Licencias emitidas a mano: el archivo lleva el código en claro
+scripts/manual-license.kv.json
