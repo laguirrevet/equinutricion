@@ -475,23 +475,30 @@ input,select{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,25
 
  <div id="android-aviso-navegador" class="hidden" style="background:var(--danger-bg,rgba(220,80,60,.12));border:1px solid rgba(220,80,60,.35);border-radius:12px;padding:12px;margin-bottom:14px;font-size:13px;line-height:1.5">
   <b>Primero abre esta página en Chrome.</b><br/>
-  Estás viéndola dentro de otra app, y ahí no se puede instalar. Toca <b>⋮</b> arriba a la derecha y elige <b>"Abrir en Chrome"</b>.
+  Estás viéndola dentro de otra app —WhatsApp, Instagram, Facebook— y ahí no se puede instalar.
+  Toca <b>⋮</b> arriba a la derecha y elige <b>"Abrir en Chrome"</b>.
  </div>
 
- <button class="btn-primary hidden" id="android-btn-instalar" onclick="installPWA()" style="margin-top:0;margin-bottom:12px">Instalar la app</button>
+ <!-- El botón real solo existe si Chrome ofreció instalar. Cuando no lo hace
+      —y no lo hace casi nunca a la primera— abajo quedan los pasos, que
+      funcionan siempre. -->
+ <button class="btn-primary hidden" id="android-btn-instalar" onclick="installPWA()" style="margin-top:0;margin-bottom:16px">Instalar ahora</button>
 
- <div id="android-manual">
-  <ol style="margin:0 0 14px;padding-left:20px;font-size:14px;line-height:1.9;color:var(--text)">
-   <li>Toca el menú <b>⋮</b>, arriba a la derecha del navegador</li>
-   <li>Elige <b>"Instalar aplicación"</b> — o <b>"Agregar a pantalla principal"</b></li>
-   <li>Confirma tocando <b>"Instalar"</b></li>
-   <li>Abre EquiNutrición desde el ícono nuevo de tu pantalla</li>
-  </ol>
+ <div id="android-manual-titulo" style="font-size:13px;font-weight:700;color:var(--accent-text);margin-bottom:10px">Instálala desde el menú de Chrome</div>
+
+ <ol style="margin:0 0 14px;padding-left:20px;font-size:14px;line-height:1.9;color:var(--text)">
+  <li>Toca el menú <b>⋮</b>, arriba a la derecha de Chrome</li>
+  <li>Elige <b>"Instalar aplicación"</b> — o <b>"Agregar a pantalla principal"</b></li>
+  <li>Confirma tocando <b>"Instalar"</b></li>
+  <li>Abre EquiNutrición desde el ícono nuevo de tu pantalla</li>
+ </ol>
+
+ <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:12px;margin-bottom:14px;font-size:12.5px;color:var(--text2);line-height:1.6">
+  <b>¿El menú dice "Abrir EquiNutrición" en vez de "Instalar aplicación"?</b><br/>
+  Entonces ya está instalada: búscala en tu pantalla de inicio o en el cajón de apps.
  </div>
 
- <div id="android-nota-manual" class="hidden" style="font-size:12px;color:var(--text3);line-height:1.6;margin-bottom:14px">
-  Si el botón no hace nada, instálala desde el menú <b>⋮</b> del navegador → <b>"Instalar aplicación"</b>.
- </div>
+ <div id="android-diagnostico" style="font-size:11.5px;color:var(--text3);line-height:1.5;margin-bottom:14px"></div>
 
  <button class="btn-secondary" onclick="closeAndroidModal(null)" style="width:100%">Seguir en el navegador</button>
  </div>
@@ -3545,10 +3552,12 @@ function refrescarBannerInstalar() {
   ? '📲 Agrega EquiNutrición a tu inicio para usarla sin internet'
   : '📲 Instala EquiNutrición en tu celular para usarla sin internet';
 
+ // El botón dice "Instalar" siempre. Antes decía "Cómo hacerlo" cuando Chrome
+ // no había ofrecido el evento, y eso se lee como que la app no se puede
+ // instalar — que es justo lo contrario de lo que pasa: se puede, a mano.
  const btn = document.getElementById('install-btn');
- const nativo = !ios && promptDisponible() && !esNavegadorIncrustado();
- btn.textContent = nativo ? 'Instalar' : 'Cómo hacerlo';
- btn.onclick = nativo ? installPWA : mostrarInstalacion;
+ btn.textContent = ios ? 'Cómo hacerlo' : 'Instalar';
+ btn.onclick = ios ? mostrarInstalacion : installPWA;
  banner.classList.remove('hidden');
 }
 
@@ -3569,16 +3578,34 @@ function closeIosModal(event) {
  document.getElementById('modal-ios').classList.add('hidden');
 }
 
+/**
+ * Los pasos a mano se muestran siempre, esté o no el botón nativo. Ocultarlos
+ * cuando había botón dejaba al usuario sin salida si el botón no respondía,
+ * y el botón es justamente la parte que no depende de nosotros.
+ */
 function showAndroidModal() {
  const incrustado = esNavegadorIncrustado();
  // Dentro de WhatsApp o Instagram el botón nativo no existe aunque el evento
  // haya llegado: ahí lo único que sirve es salir al navegador.
  const nativo = promptDisponible() && !incrustado;
+
  document.getElementById('android-aviso-navegador').classList.toggle('hidden', !incrustado);
  document.getElementById('android-btn-instalar').classList.toggle('hidden', !nativo);
- document.getElementById('android-manual').classList.toggle('hidden', nativo);
- document.getElementById('android-nota-manual').classList.toggle('hidden', !nativo);
+ document.getElementById('android-manual-titulo').textContent = nativo
+  ? 'Si el botón no responde, hazlo desde el menú de Chrome'
+  : 'Instálala desde el menú de Chrome';
+ document.getElementById('android-diagnostico').textContent = razonSinBotonNativo(incrustado, nativo);
  document.getElementById('modal-android').classList.remove('hidden');
+}
+
+/** Que el usuario sepa por qué falta el botón, en vez de creer que se rompió. */
+function razonSinBotonNativo(incrustado, nativo) {
+ if (nativo) return '';
+ if (incrustado) return 'El botón automático no existe dentro de otra app. Abre la página en Chrome o sigue los pasos de arriba.';
+ if (!/Chrome|CriOS|SamsungBrowser|Edg/i.test(navigator.userAgent)) {
+  return 'Tu navegador no ofrece el botón automático de instalación. Los pasos de arriba funcionan igual.';
+ }
+ return 'Chrome no ofreció el botón automático esta vez — a veces tarda hasta la segunda visita. Los pasos de arriba funcionan siempre.';
 }
 
 function closeAndroidModal(event) {
