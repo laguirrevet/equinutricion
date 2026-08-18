@@ -10,6 +10,19 @@
 <link rel="manifest" href="manifest.json"/>
 <link rel="icon" href="favicon.ico"/>
 <title>EquiNutrición</title>
+
+<!-- Chrome dispara "beforeinstallprompt" apenas valida el manifest, y este
+     archivo es largo: para cuando el script del final se registra, el evento
+     ya pasó y no vuelve. Escucharlo aquí arriba es lo que hace que el botón
+     de instalar aparezca en Android. -->
+<script>
+window.__enInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', function (e) {
+ e.preventDefault();
+ window.__enInstallPrompt = e;
+ if (typeof window.__enPromptListo === 'function') window.__enPromptListo();
+});
+</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -447,6 +460,40 @@ input,select{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,25
  </div>
 
  <button class="btn-primary" onclick="closeIosModal(null)">Entendido</button>
+ </div>
+</div>
+
+<!-- INSTALACIÓN EN ANDROID
+     Chrome ofrece un botón de instalar solo cuando dispara
+     "beforeinstallprompt", y no siempre lo hace: dentro de WhatsApp o
+     Instagram nunca, y en Firefox tampoco. Por eso el camino a mano queda
+     escrito acá: es el único que funciona en todos los casos. -->
+<div id="modal-android" class="modal-overlay hidden" style="z-index:150" onclick="closeAndroidModal(event)">
+ <div class="modal" onclick="event.stopPropagation()">
+ <div class="modal-title">Instala EquiNutrición</div>
+ <div class="modal-sub">Queda como una app más en tu teléfono y funciona sin internet.</div>
+
+ <div id="android-aviso-navegador" class="hidden" style="background:var(--danger-bg,rgba(220,80,60,.12));border:1px solid rgba(220,80,60,.35);border-radius:12px;padding:12px;margin-bottom:14px;font-size:13px;line-height:1.5">
+  <b>Primero abre esta página en Chrome.</b><br/>
+  Estás viéndola dentro de otra app, y ahí no se puede instalar. Toca <b>⋮</b> arriba a la derecha y elige <b>"Abrir en Chrome"</b>.
+ </div>
+
+ <button class="btn-primary hidden" id="android-btn-instalar" onclick="installPWA()" style="margin-top:0;margin-bottom:12px">Instalar la app</button>
+
+ <div id="android-manual">
+  <ol style="margin:0 0 14px;padding-left:20px;font-size:14px;line-height:1.9;color:var(--text)">
+   <li>Toca el menú <b>⋮</b>, arriba a la derecha del navegador</li>
+   <li>Elige <b>"Instalar aplicación"</b> — o <b>"Agregar a pantalla principal"</b></li>
+   <li>Confirma tocando <b>"Instalar"</b></li>
+   <li>Abre EquiNutrición desde el ícono nuevo de tu pantalla</li>
+  </ol>
+ </div>
+
+ <div id="android-nota-manual" class="hidden" style="font-size:12px;color:var(--text3);line-height:1.6;margin-bottom:14px">
+  Si el botón no hace nada, instálala desde el menú <b>⋮</b> del navegador → <b>"Instalar aplicación"</b>.
+ </div>
+
+ <button class="btn-secondary" onclick="closeAndroidModal(null)" style="width:100%">Seguir en el navegador</button>
  </div>
 </div>
 
@@ -3438,24 +3485,13 @@ function showTab(tab) {
 // ═══════════════════════════════════════════════════════
 // PWA
 // ═══════════════════════════════════════════════════════
-let deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', e => {
- e.preventDefault(); deferredPrompt = e;
- document.getElementById('install-banner').classList.remove('hidden');
-});
-function installPWA() {
- if (!deferredPrompt) return;
- deferredPrompt.prompt();
- deferredPrompt.userChoice.then(() => {
- deferredPrompt = null;
- document.getElementById('install-banner').classList.add('hidden');
- });
-}
-window.addEventListener('appinstalled', () => document.getElementById('install-banner').classList.add('hidden'));
+// El evento de instalación se captura arriba, en el <head>: para cuando este
+// script corre ya puede haber pasado, y no se repite. Acá solo se lee.
+function promptDisponible() { return !!window.__enInstallPrompt; }
 
 // iOS nunca dispara beforeinstallprompt: Apple no permite instalar con un
-// botón. Sin esto, en iPhone el banner jamás aparece y el usuario no tiene
-// forma de saber que la app se puede agregar al inicio.
+// botón. Sin esto, en iPhone el usuario no tiene forma de saber que la app se
+// puede agregar al inicio.
 function esIOS() {
  const ua = navigator.userAgent;
  // El iPad moderno se declara Macintosh; se distingue porque es táctil
@@ -3467,9 +3503,59 @@ function yaEstaInstalada() {
         window.matchMedia('(display-mode: standalone)').matches;
 }
 
-/** Los navegadores incrustados (WhatsApp, Instagram) no ofrecen "Agregar a inicio". */
+/** Los navegadores incrustados (WhatsApp, Instagram) no ofrecen instalar. */
 function esNavegadorIncrustado() {
- return /FBAN|FBAV|FB_IAB|Instagram|Line\/|WhatsApp|MicroMessenger/i.test(navigator.userAgent);
+ return /FBAN|FBAV|FB_IAB|Instagram|Line/|WhatsApp|MicroMessenger/i.test(navigator.userAgent);
+}
+
+function installPWA() {
+ const evento = window.__enInstallPrompt;
+ // Sin evento no hay botón nativo posible: queda el camino a mano.
+ if (!evento) { mostrarInstalacion(); return; }
+ window.__enInstallPrompt = null;   // el evento se consume: no se puede repetir
+ evento.prompt();
+ evento.userChoice.then(res => {
+  if (res && res.outcome === 'accepted') {
+   ocultarInstalacion();
+  } else {
+   // Se arrepintió: el banner sigue, pero ya sin botón nativo
+   refrescarBannerInstalar();
+  }
+ });
+}
+
+function ocultarInstalacion() {
+ document.getElementById('install-banner').classList.add('hidden');
+ document.getElementById('modal-android').classList.add('hidden');
+ document.getElementById('modal-ios').classList.add('hidden');
+}
+
+/**
+ * El banner se muestra siempre que la app no esté instalada, no solo cuando
+ * Chrome ofrece el botón. Esperar al evento dejaba a Android sin ninguna
+ * señal de que la app se puede instalar — que es justo lo que pasó en terreno.
+ */
+function refrescarBannerInstalar() {
+ const banner = document.getElementById('install-banner');
+ if (!banner) return;
+ if (yaEstaInstalada()) { banner.classList.add('hidden'); return; }
+
+ const ios = esIOS();
+ document.getElementById('install-texto').textContent = ios
+  ? '📲 Agrega EquiNutrición a tu inicio para usarla sin internet'
+  : '📲 Instala EquiNutrición en tu celular para usarla sin internet';
+
+ const btn = document.getElementById('install-btn');
+ const nativo = !ios && promptDisponible() && !esNavegadorIncrustado();
+ btn.textContent = nativo ? 'Instalar' : 'Cómo hacerlo';
+ btn.onclick = nativo ? installPWA : mostrarInstalacion;
+ banner.classList.remove('hidden');
+}
+
+/** Lo primero que ve quien todavía no instaló la app. */
+function mostrarInstalacion() {
+ if (yaEstaInstalada()) return;
+ if (esIOS()) showIosModal(); else showAndroidModal();
 }
 
 function showIosModal() {
@@ -3483,14 +3569,31 @@ function closeIosModal(event) {
  document.getElementById('modal-ios').classList.add('hidden');
 }
 
-if (esIOS() && !yaEstaInstalada()) {
- document.getElementById('install-texto').textContent =
-  '📲 Agrega EquiNutrición a tu inicio para usarla sin internet';
- const btn = document.getElementById('install-btn');
- btn.textContent = 'Cómo hacerlo';
- btn.onclick = showIosModal;
- document.getElementById('install-banner').classList.remove('hidden');
+function showAndroidModal() {
+ const incrustado = esNavegadorIncrustado();
+ // Dentro de WhatsApp o Instagram el botón nativo no existe aunque el evento
+ // haya llegado: ahí lo único que sirve es salir al navegador.
+ const nativo = promptDisponible() && !incrustado;
+ document.getElementById('android-aviso-navegador').classList.toggle('hidden', !incrustado);
+ document.getElementById('android-btn-instalar').classList.toggle('hidden', !nativo);
+ document.getElementById('android-manual').classList.toggle('hidden', nativo);
+ document.getElementById('android-nota-manual').classList.toggle('hidden', !nativo);
+ document.getElementById('modal-android').classList.remove('hidden');
 }
+
+function closeAndroidModal(event) {
+ if (event && event.target !== event.currentTarget) return;
+ document.getElementById('modal-android').classList.add('hidden');
+}
+
+// Si Chrome ofrece instalar después de que ya pintamos la pantalla, se
+// reemplaza el instructivo por el botón de verdad sin que el usuario haga nada.
+window.__enPromptListo = function () {
+ refrescarBannerInstalar();
+ if (!document.getElementById('modal-android').classList.contains('hidden')) showAndroidModal();
+};
+
+window.addEventListener('appinstalled', ocultarInstalacion);
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 
@@ -3510,6 +3613,7 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
  document.getElementById('topbar-logo-img').src = APP_ICON;
  document.getElementById('ob-logo').src = APP_ICON;
  updatePlanChip();
+ refrescarBannerInstalar();
 
  // ¿Volvemos de pagar en Mercado Pago?
  // El parámetro en la URL siempre se reclama, incluso si ya es Premium:
@@ -3526,6 +3630,11 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
   return;
  }
  if (ordenGuardada) localStorage.removeItem('en_last_order');
+
+ // Instalar es lo primero: quien llega por un enlace está en el navegador, y
+ // ahí la app no funciona sin internet ni tiene ícono propio. Se muestra por
+ // encima del onboarding y se cierra de un toque.
+ if (!yaEstaInstalada()) mostrarInstalacion();
 
  // Entrada directa desde el landing: ?planes=1 abre la pantalla de planes
  // aunque el usuario ya haya pasado por el onboarding alguna vez.
